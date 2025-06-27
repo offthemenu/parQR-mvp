@@ -33,7 +33,7 @@ coverage.xml
 
 # Virtual Environments
 .venv/
-ENV/
+.env
 env.bak/
 venv.bak/
 
