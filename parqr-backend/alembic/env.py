@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from app.db.base import Base
+from app.db.base_metadata import Base
 from app.models import user, car, parking_session
 
 import sys
