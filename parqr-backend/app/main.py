@@ -10,7 +10,6 @@ app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
 
-@app.get("/ping")
-def health_check():
-    res = {"status" : "pong" }
-    return res 
+from routes import health_check
+
+app.include_router(health_check.router, prefix= "/api")
