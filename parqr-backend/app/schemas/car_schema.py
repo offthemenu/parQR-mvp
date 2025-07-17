@@ -2,9 +2,8 @@ from pydantic import BaseModel
 
 class CarCreate(BaseModel):
     license_plate: str
-    brand: str
-    model: str
-    user_id: int
+    car_brand: str
+    car_model: str
 
 class CarOut(BaseModel):
     id: int

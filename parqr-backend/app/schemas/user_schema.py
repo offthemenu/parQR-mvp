@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 
 class UserCreate(BaseModel):
-    phone: str
+    phone_number: str
 
 class UserOut(BaseModel):
     id: int
-    phone: str
+    phone_number: str
     user_code: str
 
     class Config:

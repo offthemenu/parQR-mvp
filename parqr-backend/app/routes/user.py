@@ -9,8 +9,8 @@ router = APIRouter(prefix="/v01/user")
 
 @router.post("/register", response_model=UserOut)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
-    user_code = str(uuid.uuid4())[:6]
-    new_user = user_model.User(phone=user.phone, user_code=user_code)
+    # user_code = str(uuid.uuid4())[:6]
+    new_user = user_model.User(**user.model_dump())
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
