@@ -3,8 +3,6 @@ from typing import Optional
 from datetime import datetime
 
 class ParkingSessionCreate(BaseModel):
-    user_id: int
-    car_id: int
     location: Optional[str] = None
     longitude: Optional[float] = None
     latitude: Optional[float] = None
@@ -14,6 +12,8 @@ class ParkingSessionEnd(BaseModel):
 
 class ParkingSessionOut(BaseModel):
     id: int
+    user_id: int
+    car_id: int
     start_time: datetime
     end_time: Optional[datetime]
 
