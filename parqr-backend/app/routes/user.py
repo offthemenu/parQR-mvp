@@ -1,19 +1,104 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.schemas.user_schema import UserCreate, UserOut
-from app.db.base import get_db
-from app.models import user as user_model
+from app.db.session import get_db
+from app.models.user import User
+from app.schemas.user_schema import UserRegisterRequest, UserResponse, UserPublicResponse
+from app.dependencies.auth import get_current_user
+import secrets
+import string
+import hashlib
 import uuid
 
-router = APIRouter(prefix="/v01/user")
+router = APIRouter(prefix="/v01/user", tags=["user"])
 
-@router.post("/register", response_model=UserOut)
-def register_user(user: UserCreate, db: Session = Depends(get_db)):
-    # user_code = str(uuid.uuid4())[:6]
-    user_data = user.model_dump()
-    new_user = user_model.User(**user_data)
+def generate_user_code() -> str:
+    """Generate 8-character alphanumeric user code"""
+    return ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+
+def generate_qr_code_id(user_code: str, phone_number: str) -> str:
+    """
+    Generate unique QR code ID based on user data
+    Format: QR_[8-char-hash] for easy identification
+    """
+    # Create unique string from user data + timestamp
+    unique_string = f"{user_code}_{phone_number}_{uuid.uuid4().hex[:8]}"
+    
+    # Generate SHA-256 hash and take first 8 characters
+    hash_object = hashlib.sha256(unique_string.encode())
+    short_hash = hash_object.hexdigest()[:8].upper()
+    
+    return f"QR_{short_hash}"
+
+@router.post("/register", response_model=UserResponse)
+def register_user(
+    user_data: UserRegisterRequest,
+    db: Session = Depends(get_db)
+):
+    # Check if phone number already exists
+    existing_user = db.query(User).filter(User.phone_number == user_data.phone_number).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Phone number already registered")
+    
+    # Generate unique user_code
+    user_code = generate_user_code()
+    while db.query(User).filter(User.user_code == user_code).first():
+        user_code = generate_user_code()
+    
+    # Generate QR code ID 
+    qr_code_id = generate_qr_code_id(user_code, user_data.phone_number)
+    
+    new_user = User(
+        phone_number=user_data.phone_number,
+        user_code=user_code,
+        qr_code_id=qr_code_id  
+    )
+    
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    
     return new_user
 
+@router.get("/profile", response_model=UserResponse)
+def get_user_profile(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get current user's profile - phone_number excluded from response"""
+    return current_user
+
+@router.get("/public/{user_code}", response_model=UserPublicResponse)
+def get_public_user_info(
+    user_code: str,
+    db: Session = Depends(get_db)
+):
+    """Get minimal public user information by user_code"""
+    user = db.query(User).filter(User.user_code == user_code).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return UserPublicResponse(
+        user_code=user.user_code,
+        qr_code_id=user.qr_code_id
+    )
+
+@router.post("/regenerate-qr", response_model=UserResponse)
+def regenerate_user_qr_code(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Regenerate QR code for existing user"""
+    
+    # Generate new QR code ID
+    qr_code_id = generate_qr_code_id(current_user.user_code, current_user.phone_number)
+    
+    # Ensure uniqueness
+    while db.query(User).filter(User.qr_code_id == qr_code_id).first():
+        qr_code_id = generate_qr_code_id(current_user.user_code, current_user.phone_number)
+    
+    # Update user with new QR code
+    current_user.qr_code_id = qr_code_id
+    db.commit()
+    db.refresh(current_user)
+    
+    return current_user
