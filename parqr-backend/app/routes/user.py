@@ -8,6 +8,9 @@ import secrets
 import string
 import hashlib
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/v01/user", tags=["user"])
 
@@ -34,18 +37,24 @@ def register_user(
     user_data: UserRegisterRequest,
     db: Session = Depends(get_db)
 ):
+    logger.info(f"User registration attempt for phone: {user_data.phone_number}")
+    
     # Check if phone number already exists
     existing_user = db.query(User).filter(User.phone_number == user_data.phone_number).first()
     if existing_user:
+        logger.warning(f"Registration failed - phone number already exists: {user_data.phone_number}")
         raise HTTPException(status_code=400, detail="Phone number already registered")
     
     # Generate unique user_code
     user_code = generate_user_code()
     while db.query(User).filter(User.user_code == user_code).first():
+        logger.debug(f"User code collision, regenerating: {user_code}")
         user_code = generate_user_code()
     
     # Generate QR code ID 
     qr_code_id = generate_qr_code_id(user_code, user_data.phone_number)
+    
+    logger.info(f"Generated user_code: {user_code}, qr_code_id: {qr_code_id}")
     
     new_user = User(
         phone_number=user_data.phone_number,
@@ -57,6 +66,7 @@ def register_user(
     db.commit()
     db.refresh(new_user)
     
+    logger.info(f"User registered successfully with ID: {new_user.id}")
     return new_user
 
 @router.get("/profile", response_model=UserResponse)
@@ -88,12 +98,16 @@ def regenerate_user_qr_code(
     db: Session = Depends(get_db)
 ):
     """Regenerate QR code for existing user"""
+    logger.info(f"QR code regeneration requested for user_id: {current_user.id}")
+    
+    old_qr_code = current_user.qr_code_id
     
     # Generate new QR code ID
     qr_code_id = generate_qr_code_id(current_user.user_code, current_user.phone_number)
     
     # Ensure uniqueness
     while db.query(User).filter(User.qr_code_id == qr_code_id).first():
+        logger.debug(f"QR code collision during regeneration: {qr_code_id}")
         qr_code_id = generate_qr_code_id(current_user.user_code, current_user.phone_number)
     
     # Update user with new QR code
@@ -101,4 +115,5 @@ def regenerate_user_qr_code(
     db.commit()
     db.refresh(current_user)
     
+    logger.info(f"QR code regenerated: {old_qr_code} -> {qr_code_id}")
     return current_user
