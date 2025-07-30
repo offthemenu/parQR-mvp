@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.db.session import get_db
+from app.db.base import get_db
 from app.models.car import Car
 from app.models.user import User
 from app.schemas.car_schema import CarRegisterRequest, CarResponse, CarPublicResponse
