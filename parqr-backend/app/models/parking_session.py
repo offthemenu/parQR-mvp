@@ -11,7 +11,7 @@ class ParkingSession(Base):
     car_id = Column(Integer, ForeignKey('cars.id'), nullable=False)
     start_time = Column(DateTime, default=datetime.now(timezone.utc))
     end_time = Column(DateTime, nullable=True)
-    location = Column(String(100), nullable=True)
+    note_location = Column(String(100), nullable=True)
     longitude = Column(Float, nullable=True)
     latitude = Column(Float, nullable=True)
 

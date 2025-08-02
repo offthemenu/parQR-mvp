@@ -164,7 +164,7 @@ def create_mock_parking_sessions(db: Session, users: list[User], cars: list[Car]
             car_id=car.id,
             start_time=start_time,
             end_time=end_time,
-            location=random.choice(locations),
+            note_location=random.choice(locations),
             latitude=random.uniform(*lat_range),
             longitude=random.uniform(*lng_range)
         )
