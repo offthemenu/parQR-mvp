@@ -1,16 +1,16 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware 
+from dotenv import load_dotenv
+
 from app.db.session import engine
 from app.db.base import Base
-from dotenv import load_dotenv
-import os
+from app.routes import car, health_check, parking, user
 
 load_dotenv(override=True)
 
-from app.routes import car, health_check, parking, user
-
-# Print DATABASE_URL for verification (remove in production)
-print(f"🔗 DATABASE_URL: {os.getenv('DATABASE_URL')}")
+# Database URL loaded from environment
 
 app = FastAPI(
     title="parQR API",
