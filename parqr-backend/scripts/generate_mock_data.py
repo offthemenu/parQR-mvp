@@ -17,7 +17,7 @@ from app.db.session import SessionLocal, engine
 from app.models.user import User
 from app.models.car import Car
 from app.models.parking_session import ParkingSession
-from country_codes import SERVICING_COUNTRIES
+from .country_codes import SERVICING_COUNTRIES
 
 def generate_user_code() -> str:
     """Generate 8-character alphanumeric user code (matching user.py logic)"""
@@ -145,7 +145,7 @@ def create_mock_users(db: Session, count: int = 10) -> list[User]:
     print(f"✅ Created {count} mock users")
     return users
 
-def create_mock_cars(db: Session, users: list[User], cars_per_user: int = 2) -> list[Car]:
+def create_mock_cars(db: Session, users: list[User], cars_per_user: int = 1) -> list[Car]:
     """Create mock cars for users"""
     car_brands = ["Toyota", "Honda", "Ford", "BMW", "Mercedes Benz", "Audi", "Hyundai"]
     car_models = {
@@ -265,9 +265,9 @@ def main():
             print(f"Database has {user_count} users. Proceeding to add more data...")
         
         # Generate data
-        users = create_mock_users(db, count=15)
-        cars = create_mock_cars(db, users, cars_per_user=3)
-        create_mock_parking_sessions(db, users, cars, sessions_count=75)
+        users = create_mock_users(db, count=10)
+        cars = create_mock_cars(db, users, cars_per_user=1)
+        create_mock_parking_sessions(db, users, cars, sessions_count=30)
         
         # Print summary
         total_users = db.query(User).count()
