@@ -39,8 +39,22 @@ def register_user(
 ):
     logger.info(f"User registration attempt for phone: {user_data.phone_number}")
     
+    # Basic validation for Korean mobile format
+    if len(user_data.phone_number) != 11:
+        raise HTTPException(status_code=400, detail="Phone number must be 11 digits")
+    
+    if not user_data.phone_number.isdigit():
+        raise HTTPException(status_code=400, detail="Phone number must contain only digits")
+    
+    if not user_data.phone_number.startswith("010"):
+        raise HTTPException(status_code=400, detail="Invalid mobile phone number format")
+    
+    # Transform to international format
+    phone_number_parse = user_data.phone_number[1:]
+    phone_number_clean = f"+82{phone_number_parse}"
+    
     # Check if phone number already exists
-    existing_user = db.query(User).filter(User.phone_number == user_data.phone_number).first()
+    existing_user = db.query(User).filter(User.phone_number == phone_number_clean).first()
     if existing_user:
         logger.warning(f"Registration failed - phone number already exists: {user_data.phone_number}")
         raise HTTPException(status_code=400, detail="Phone number already registered")
@@ -52,12 +66,12 @@ def register_user(
         user_code = generate_user_code()
     
     # Generate QR code ID 
-    qr_code_id = generate_qr_code_id(user_code, user_data.phone_number)
+    qr_code_id = generate_qr_code_id(user_code, phone_number_clean)
     
     logger.info(f"Generated user_code: {user_code}, qr_code_id: {qr_code_id}")
     
     new_user = User(
-        phone_number=user_data.phone_number,
+        phone_number=phone_number_clean,
         user_code=user_code,
         qr_code_id=qr_code_id  
     )
