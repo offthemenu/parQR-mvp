@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { DEV_CONFIG } from './development';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_LOCAL_API_BASE_URL || 'http://localhost:8010/api';
+const API_BASE_URL = DEV_CONFIG.EXPO_PUBLIC_LOCAL_API_BASE_URL;
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -25,7 +26,9 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('API Error:', error.response?.data || error.message);
+    if (__DEV__) {
+      console.log('API Error:', error.response?.data || error.message);
+    }
     return Promise.reject(error);
   }
 );
