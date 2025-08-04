@@ -16,7 +16,7 @@ from pathlib import Path
 scripts_dir = Path(__file__).parent.parent.parent / "scripts"
 sys.path.insert(0, str(scripts_dir))
 
-from country_codes import get_servicing_countries_list, is_valid_country_iso
+from country_codes import get_servicing_countries_list, is_valid_country_iso, SERVICING_COUNTRIES
 
 logger = logging.getLogger(__name__)
 

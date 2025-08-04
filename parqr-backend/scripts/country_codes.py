@@ -12,6 +12,10 @@ Usage:
 """
 
 SERVICING_COUNTRIES = {
+    "South Korea": {"country_iso": "KR", "country_code": "+82"}
+}
+
+ALL_COUNTRIES = {
     # Asia-Pacific
     "South Korea": {"country_iso": "KR", "country_code": "+82"},
     "Japan": {"country_iso": "JP", "country_code": "+81"},
