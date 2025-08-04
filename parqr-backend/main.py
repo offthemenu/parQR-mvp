@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from app.db.session import engine
 from app.db.base import Base
-from app.routes import car, health_check, parking, user
+from app.routes import car, health_check, parking, user, signup
 
 load_dotenv(override=True)
 
@@ -24,6 +24,7 @@ origins = [
     "http://localhost:19006",     # Expo development server
     "http://127.0.0.1:3000",
     "http://127.0.0.1:19006",
+    "null",                       # For local HTML files (file:// protocol)
 ]
 
 # Add production origins from environment variable
@@ -45,6 +46,7 @@ app.include_router(health_check.router, prefix= "/api")
 app.include_router(user.router, prefix= "/api")
 app.include_router(car.router, prefix= "/api")
 app.include_router(parking.router, prefix= "/api")
+app.include_router(signup.router, prefix = "/api")
 
 if __name__ == "__main__":
     import uvicorn
