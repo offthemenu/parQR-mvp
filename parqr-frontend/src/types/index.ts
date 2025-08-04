@@ -33,17 +33,25 @@ export interface ParkingSession {
 // API Request/Response types
 export interface RegisterUserRequest {
   phone_number: string;
-  signup_country_iso?: string;
+  signup_country_iso: string;
 }
 
 export interface RegisterUserResponse {
   id: number;
-  signup_country_iso: string;
-  phone_number: string;
   user_code: string;
   qr_code_id: string;
   created_at: string;
-  message: string;
+  signup_country_iso: string;
+}
+
+export interface ServicingCountriesResponse {
+  countries: CountryInfo[];
+}
+
+export interface CountryInfo {
+  country_name: string;
+  iso_code: string;
+  flag_emoji: string;
 }
 
 // Navigation types
@@ -51,6 +59,17 @@ export type RootStackParamList = {
   Register: undefined;
   Profile: { user: User };
 };
+
+// Validation types
+export interface ValidationResult {
+  isValid: boolean;
+  message?: string;
+}
+
+export interface PhoneValidationOptions {
+  countryCode?: string;
+  allowInternational?: boolean;
+}
 
 // API Error type
 export interface ApiError {
