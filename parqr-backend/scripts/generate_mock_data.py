@@ -17,6 +17,7 @@ from app.db.session import SessionLocal, engine
 from app.models.user import User
 from app.models.car import Car
 from app.models.parking_session import ParkingSession
+from country_codes import SERVICING_COUNTRIES
 
 def generate_user_code() -> str:
     """Generate 8-character alphanumeric user code (matching user.py logic)"""
@@ -29,9 +30,48 @@ def generate_qr_code_id(user_code: str, phone_number: str) -> str:
     short_hash = hash_object.hexdigest()[:8].upper()
     return f"QR_{short_hash}"
 
-def generate_phone_number() -> str:
-    """Generate realistic phone number"""
-    return f"+82{random.randint(1000000000, 1099999999)}"
+def generate_phone_number_by_country(country_iso: str) -> str:
+    """Generate realistic phone number based on country"""
+    if country_iso == "KR":
+        # Korean mobile format: 01012345678
+        return f"010{random.randint(10000000, 99999999)}"
+    elif country_iso == "US" or country_iso == "CA":
+        # US/Canada format: +1XXXXXXXXXX
+        return f"+1{random.randint(2000000000, 9999999999)}"
+    elif country_iso == "JP":
+        # Japan mobile format: +8190XXXXXXXX
+        return f"+8190{random.randint(10000000, 99999999)}"
+    elif country_iso == "CN":
+        # China mobile format: +861XXXXXXXXXX
+        return f"+861{random.randint(300000000, 999999999)}"
+    elif country_iso == "GB":
+        # UK mobile format: +447XXXXXXXXX
+        return f"+447{random.randint(100000000, 999999999)}"
+    elif country_iso == "DE":
+        # Germany mobile format: +4915XXXXXXXXX
+        return f"+4915{random.randint(100000000, 999999999)}"
+    elif country_iso == "FR":
+        # France mobile format: +336XXXXXXXX
+        return f"+336{random.randint(10000000, 99999999)}"
+    elif country_iso == "AU":
+        # Australia mobile format: +614XXXXXXXX
+        return f"+614{random.randint(10000000, 99999999)}"
+    else:
+        # Generic international format for other countries
+        country_info = None
+        for name, info in SERVICING_COUNTRIES.items():
+            if info["country_iso"] == country_iso:
+                country_info = info
+                break
+        
+        if country_info:
+            country_code = country_info["country_code"]
+            # Generate 8-10 digit number after country code
+            digits = random.randint(10000000, 9999999999)
+            return f"{country_code}{digits}"
+        else:
+            # Fallback
+            return f"+{random.randint(1, 999)}{random.randint(100000000, 9999999999)}"
 
 def generate_license_plate() -> str:
     """Generate realistic Korean license plate"""
@@ -45,9 +85,12 @@ def generate_license_plate() -> str:
     return f"{numbers_prefix}{korean_char}{numbers_suffix}"
 
 def create_mock_users(db: Session, count: int = 10) -> list[User]:
-    """Create mock users"""
+    """Create mock users with diverse country representation"""
     users = []
     used_phones = set()
+    
+    # Get list of available countries
+    available_countries = list(SERVICING_COUNTRIES.values())
     
     for _ in range(count):
         user_code = generate_user_code()
@@ -55,20 +98,45 @@ def create_mock_users(db: Session, count: int = 10) -> list[User]:
         while db.query(User).filter(User.user_code == user_code).first():
             user_code = generate_user_code()
         
-        # Generate unique phone number
-        phone_number = generate_phone_number()
-        while (phone_number in used_phones or 
-               db.query(User).filter(User.phone_number == phone_number).first()):
-            phone_number = generate_phone_number()
-        used_phones.add(phone_number)
+        # Randomly select a country (with bias towards South Korea for demo)
+        if random.random() <  1:  # 60% chance of South Korea
+            country_info = {"country_iso": "KR", "country_code": "+82"}
+        else:
+            country_info = random.choice(available_countries)
+        
+        country_iso = country_info["country_iso"]
+        
+        # Generate country-appropriate phone number
+        phone_number = generate_phone_number_by_country(country_iso)
+        
+        # For Korean numbers, ensure they follow the registration logic
+        if country_iso == "KR":
+            # Convert to international format like the registration endpoint does
+            if phone_number.startswith("010"):
+                phone_number_clean = f"+82{phone_number[1:]}"
+            else:
+                phone_number_clean = phone_number
+        else:
+            phone_number_clean = phone_number
+        
+        # Ensure uniqueness
+        while (phone_number_clean in used_phones or 
+               db.query(User).filter(User.phone_number == phone_number_clean).first()):
+            phone_number = generate_phone_number_by_country(country_iso)
+            if country_iso == "KR" and phone_number.startswith("010"):
+                phone_number_clean = f"+82{phone_number[1:]}"
+            else:
+                phone_number_clean = phone_number
+        used_phones.add(phone_number_clean)
         
         # Generate QR code using proper logic
-        qr_code_id = generate_qr_code_id(user_code, phone_number)
+        qr_code_id = generate_qr_code_id(user_code, phone_number_clean)
         
         user = User(
-            phone_number=phone_number,
+            phone_number=phone_number_clean,
             user_code=user_code,
-            qr_code_id=qr_code_id
+            qr_code_id=qr_code_id,
+            signup_country_iso=country_iso
         )
         db.add(user)
         users.append(user)
@@ -118,17 +186,22 @@ def create_mock_cars(db: Session, users: list[User], cars_per_user: int = 2) -> 
 
 def create_mock_parking_sessions(db: Session, users: list[User], cars: list[Car], sessions_count: int = 50):
     """Create mock parking sessions"""
-    locations = [
-        "Downtown Parking Garage",
-        "Mall Parking Lot",
-        "Street Parking - Main St",
-        "Office Building Garage",
-        "Airport Long-term",
-        "Hospital Visitor Parking",
-        "University Campus",
-        "Shopping Center",
-        "Residential Street",
-        "Stadium Parking"
+    # Optional parking note examples (realistic user inputs)
+    parking_notes = [
+        "Section G8",
+        "Level B3", 
+        "Near elevator",
+        "Spot 47",
+        "Level 2, Zone A",
+        "Close to entrance",
+        "Section C, Row 5",
+        "Parking Structure 3",
+        "Ground floor",
+        "Level P1, near exit",
+        "Visitor parking",
+        "Row D, spot 23",
+        "Near mall entrance",
+        "Level -1, Section B"
     ]
     
     # Create coordinate ranges for Seoul metropolitan area
@@ -159,12 +232,17 @@ def create_mock_parking_sessions(db: Session, users: list[User], cars: list[Car]
                 minutes=random.randint(0, 59)
             )
         
+        # 40% chance of having a parking note (mimics real usage)
+        note_location = None
+        if random.random() < 0.4:
+            note_location = random.choice(parking_notes)
+        
         session = ParkingSession(
             user_id=user.id,
             car_id=car.id,
             start_time=start_time,
             end_time=end_time,
-            note_location=random.choice(locations),
+            note_location=note_location,
             latitude=random.uniform(*lat_range),
             longitude=random.uniform(*lng_range)
         )
@@ -184,10 +262,7 @@ def main():
         # Check if data already exists
         user_count = db.query(User).count()
         if user_count > 0:
-            response = input(f"Database has {user_count} users. Continue? (y/N): ")
-            if response.lower() != 'y':
-                print("❌ Cancelled")
-                return
+            print(f"Database has {user_count} users. Proceeding to add more data...")
         
         # Generate data
         users = create_mock_users(db, count=15)
@@ -200,12 +275,29 @@ def main():
         total_sessions = db.query(ParkingSession).count()
         active_sessions = db.query(ParkingSession).filter(ParkingSession.end_time.is_(None)).count()
         
+        # Country distribution  
+        from sqlalchemy import func
+        country_stats = db.query(User.signup_country_iso, 
+                                func.count(User.id).label('count'))\
+                         .group_by(User.signup_country_iso)\
+                         .all()
+        
         print("\n📊 Database Summary:")
         print(f"   Users: {total_users}")
         print(f"   Cars: {total_cars}")
         print(f"   Total Sessions: {total_sessions}")
         print(f"   Active Sessions: {active_sessions}")
         print(f"   Completed Sessions: {total_sessions - active_sessions}")
+        
+        print("\n🌍 Country Distribution:")
+        for country_iso, count in country_stats:
+            # Find country name
+            country_name = "Unknown"
+            for name, info in SERVICING_COUNTRIES.items():
+                if info["country_iso"] == country_iso:
+                    country_name = name
+                    break
+            print(f"   {country_name} ({country_iso}): {count} users")
         
         print("\n✅ Mock data generation completed!")
         
