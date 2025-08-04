@@ -7,6 +7,7 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, index=True)
+    signup_country_iso = Column(String(5), nullable=False)
     phone_number = Column(String(20), unique=True, nullable=False)
     user_code = Column(String(50), unique=True, default=lambda: str(uuid.uuid4()))
     qr_code_id = Column(String(50), unique=True, default=lambda: str(uuid.uuid4()))

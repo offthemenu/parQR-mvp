@@ -9,6 +9,14 @@ import string
 import hashlib
 import uuid
 import logging
+import sys
+from pathlib import Path
+
+# Add scripts directory to path for imports
+scripts_dir = Path(__file__).parent.parent.parent / "scripts"
+sys.path.insert(0, str(scripts_dir))
+
+from country_codes import get_servicing_countries_list, is_valid_country_iso
 
 logger = logging.getLogger(__name__)
 
@@ -37,21 +45,33 @@ def register_user(
     user_data: UserRegisterRequest,
     db: Session = Depends(get_db)
 ):
-    logger.info(f"User registration attempt for phone: {user_data.phone_number}")
+    logger.info(f"User registration attempt for phone: {user_data.phone_number}, country: {user_data.signup_country_iso}")
     
-    # Basic validation for Korean mobile format
-    if len(user_data.phone_number) != 11:
-        raise HTTPException(status_code=400, detail="Phone number must be 11 digits")
+    # Validate country ISO code
+    if not is_valid_country_iso(user_data.signup_country_iso):
+        raise HTTPException(status_code=400, detail="Invalid country code - country not serviced")
     
-    if not user_data.phone_number.isdigit():
-        raise HTTPException(status_code=400, detail="Phone number must contain only digits")
-    
-    if not user_data.phone_number.startswith("010"):
-        raise HTTPException(status_code=400, detail="Invalid mobile phone number format")
-    
-    # Transform to international format
-    phone_number_parse = user_data.phone_number[1:]
-    phone_number_clean = f"+82{phone_number_parse}"
+    # Basic validation for Korean mobile format (assuming South Korea for now)
+    if user_data.signup_country_iso.upper() == "KR":
+        if len(user_data.phone_number) != 11:
+            raise HTTPException(status_code=400, detail="Phone number must be 11 digits")
+        
+        if not user_data.phone_number.isdigit():
+            raise HTTPException(status_code=400, detail="Phone number must contain only digits")
+        
+        if not user_data.phone_number.startswith("010"):
+            raise HTTPException(status_code=400, detail="Invalid mobile phone number format")
+        
+        # Transform to international format
+        phone_number_parse = user_data.phone_number[1:]
+        phone_number_clean = f"+82{phone_number_parse}"
+    else:
+        # For other countries, basic validation for now
+        if not user_data.phone_number.replace("+", "").replace("-", "").replace(" ", "").isdigit():
+            raise HTTPException(status_code=400, detail="Phone number must contain only digits and valid separators")
+        
+        # Store as-is for other countries (will enhance later)
+        phone_number_clean = user_data.phone_number
     
     # Check if phone number already exists
     existing_user = db.query(User).filter(User.phone_number == phone_number_clean).first()
@@ -73,7 +93,8 @@ def register_user(
     new_user = User(
         phone_number=phone_number_clean,
         user_code=user_code,
-        qr_code_id=qr_code_id  
+        qr_code_id=qr_code_id,
+        signup_country_iso=user_data.signup_country_iso.upper()
     )
     
     db.add(new_user)
@@ -131,3 +152,16 @@ def regenerate_user_qr_code(
     
     logger.info(f"QR code regenerated: {old_qr_code} -> {qr_code_id}")
     return current_user
+
+@router.get("/servicing-countries")
+def get_servicing_countries():
+    """Get list of countries that parQR services for signup dropdown"""
+    logger.info("Servicing countries list requested")
+    
+    try:
+        countries = get_servicing_countries_list()
+        logger.info(f"Returning {len(countries)} servicing countries")
+        return {"countries": countries}
+    except Exception as e:
+        logger.error(f"Error fetching servicing countries: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve servicing countries")
