@@ -16,7 +16,7 @@ from pathlib import Path
 scripts_dir = Path(__file__).parent.parent.parent / "scripts"
 sys.path.insert(0, str(scripts_dir))
 
-from country_codes import get_servicing_countries_list, is_valid_country_iso, SERVICING_COUNTRIES
+from country_codes import get_servicing_countries_list, is_valid_country_iso
 
 logger = logging.getLogger(__name__)
 
@@ -152,16 +152,3 @@ def regenerate_user_qr_code(
     
     logger.info(f"QR code regenerated: {old_qr_code} -> {qr_code_id}")
     return current_user
-
-@router.get("/servicing-countries")
-def get_servicing_countries():
-    """Get list of countries that parQR services for signup dropdown"""
-    logger.info("Servicing countries list requested")
-    
-    try:
-        countries = get_servicing_countries_list()
-        logger.info(f"Returning {len(countries)} servicing countries")
-        return {"countries": countries}
-    except Exception as e:
-        logger.error(f"Error fetching servicing countries: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve servicing countries")
