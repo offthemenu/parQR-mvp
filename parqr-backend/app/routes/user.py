@@ -124,7 +124,8 @@ def get_public_user_info(
     
     return UserPublicResponse(
         user_code=user.user_code,
-        qr_code_id=user.qr_code_id
+        qr_code_id=user.qr_code_id,
+        signup_country_iso=user.signup_country_iso
     )
 
 @router.post("/regenerate-qr", response_model=UserResponse)
