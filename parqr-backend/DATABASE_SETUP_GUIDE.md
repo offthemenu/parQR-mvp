@@ -89,10 +89,10 @@ Create the database and user:
 CREATE DATABASE parqr_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Create dedicated user (use the same password across all your Mac devices)
-CREATE USER 'parqr_admin'@'localhost' IDENTIFIED BY 'your_secure_password';
+CREATE USER 'admin'@'localhost' IDENTIFIED BY 'SQL-parqr-wkddusdn1!';
 
 -- Grant all privileges
-GRANT ALL PRIVILEGES ON parqr_db.* TO 'parqr_admin'@'localhost';
+GRANT ALL PRIVILEGES ON parqr_db.* TO 'admin'@'localhost';
 
 -- Apply changes
 FLUSH PRIVILEGES;
@@ -106,7 +106,12 @@ EXIT;
 
 **Test the connection:**
 ```bash
-mysql -u parqr_admin -p parqr_db
+mysql -u admin -p parqr_db
+```
+
+Or using TCP connection (if socket issues):
+```bash
+mysql -u admin -h 127.0.0.1 -P 3306 -p parqr_db
 ```
 Type `EXIT;` to quit once you confirm the connection works.
 
@@ -138,14 +143,14 @@ Add this configuration to `.env` (replace `your_secure_password` with your actua
 
 ```bash
 # Database Configuration
-DB_USER=parqr_admin
-DB_PASSWORD=your_secure_password
+DB_USER=admin
+DB_PASSWORD=SQL-parqr-wkddusdn1!
 DB_HOST=localhost
 DB_PORT=3306
 DB_NAME=parqr_db
 
 # Database URL (automatically constructed)
-DATABASE_URL=mysql+mysqldb://parqr_admin:your_secure_password@localhost:3306/parqr_db
+DATABASE_URL=mysql+mysqldb://admin:SQL-parqr-wkddusdn1!@localhost:3306/parqr_db
 
 # Application Settings
 ENVIRONMENT=development
@@ -231,12 +236,173 @@ alembic current
 # Should show the latest migration ID
 ```
 
+## MySQL Workbench Setup (Optional)
+
+MySQL Workbench provides a graphical interface to manage your parQR database, making it easier to view data, run queries, and debug issues.
+
+### Installation
+
+```bash
+# Install MySQL Workbench via Homebrew
+brew install --cask mysqlworkbench
+
+# Or download from: https://dev.mysql.com/downloads/workbench/
+```
+
+### Creating a Connection
+
+1. **Open MySQL Workbench**
+
+2. **Create New Connection**:
+   - Click the `+` icon next to "MySQL Connections"
+   - Or go to `Database` → `Manage Connections`
+
+3. **Configure Connection Settings**:
+   ```
+   Connection Name: parQR Local Database
+   Connection Method: Standard (TCP/IP)
+   Hostname: 127.0.0.1
+   Port: 3306
+   Username: admin
+   Default Schema: parqr_db
+   ```
+
+4. **Set Password**:
+   - Click "Store in Vault..." (macOS) or "Store in Keychain..."
+   - Enter password: `SQL-parqr-wkddusdn1!`
+   - Click "OK"
+
+5. **Advanced Settings** (Optional but Recommended):
+   - Click "Advanced" tab
+   - Set "Use SSL": `No` (since it's localhost)
+   - Set "SQL_MODE": Leave default or set to `TRADITIONAL`
+
+6. **Test Connection**:
+   - Click "Test Connection" button
+   - Should display: "Successfully made the MySQL connection"
+   - If it fails, verify MySQL is running: `brew services list | grep mysql`
+
+7. **Save Connection**:
+   - Click "OK" to save the connection
+   - You'll see "parQR Local Database" in your connections list
+
+### Connecting and Using Workbench
+
+1. **Connect**: Double-click your "parQR Local Database" connection
+
+2. **Navigate Database**:
+   - Left sidebar shows "SCHEMAS"
+   - Expand `parqr_db` to see tables:
+     - `users`
+     - `cars`
+     - `parking_sessions`
+     - `alembic_version`
+
+3. **Useful Features**:
+   
+   **View Table Data**:
+   - Right-click any table → "Select Rows - Limit 1000"
+   
+   **Run Custom Queries**:
+   ```sql
+   -- Show all tables
+   SHOW TABLES;
+   
+   -- View table structures
+   DESCRIBE users;
+   DESCRIBE cars;
+   DESCRIBE parking_sessions;
+   
+   -- Check data counts
+   SELECT 
+       (SELECT COUNT(*) FROM users) as total_users,
+       (SELECT COUNT(*) FROM cars) as total_cars,
+       (SELECT COUNT(*) FROM parking_sessions) as total_sessions;
+   
+   -- View recent parking sessions with user details
+   SELECT 
+       ps.id,
+       u.phone_number,
+       c.license_plate,
+       ps.start_time,
+       ps.end_time,
+       ps.note_location
+   FROM parking_sessions ps
+   JOIN users u ON ps.user_id = u.id
+   JOIN cars c ON ps.car_id = c.id
+   ORDER BY ps.start_time DESC
+   LIMIT 10;
+   ```
+
+   **Export Data**:
+   - Right-click table → "Table Data Export Wizard"
+   
+   **Visual Query Builder**:
+   - Use the visual query builder for complex queries
+
+### Troubleshooting Workbench Connection
+
+#### Connection Fails
+```bash
+# Verify MySQL is running
+brew services list | grep mysql
+
+# If not running, start it
+brew services start mysql
+
+# Test command line connection first
+mysql -u admin -h 127.0.0.1 -P 3306 -p parqr_db
+```
+
+#### "Access Denied" Error
+- Double-check username: `admin`
+- Double-check password: `SQL-parqr-wkddusdn1!`
+- Verify user exists:
+```sql
+mysql -u root -h 127.0.0.1 -P 3306 -e "SELECT User, Host FROM mysql.user WHERE User='admin';"
+```
+
+#### "Unknown Database" Error
+- Verify database exists:
+```sql
+mysql -u root -h 127.0.0.1 -P 3306 -e "SHOW DATABASES;"
+```
+- If `parqr_db` is missing, recreate it using the database reset instructions above
+
+#### SSL Connection Issues
+- In Workbench connection settings, set "Use SSL" to "No"
+- Or use "Require" and configure SSL certificates if needed
+
+### Workbench Best Practices
+
+1. **Use Transactions for Data Changes**:
+   ```sql
+   START TRANSACTION;
+   -- Your data modification queries here
+   -- COMMIT; -- Only run this if you're sure
+   ROLLBACK; -- Use this to undo changes
+   ```
+
+2. **Backup Before Major Changes**:
+   - Server → Data Export → Select `parqr_db` → Export
+
+3. **Monitor Query Performance**:
+   - Use "Query" → "Explain Current Statement" for slow queries
+
+4. **View Migration History**:
+   ```sql
+   SELECT * FROM alembic_version;
+   ```
+
 ## Verification
 
 ### 1. Check Database Tables
 ```bash
 # Verify all tables were created
-mysql -u parqr_admin -p parqr_db -e "SHOW TABLES;"
+mysql -u admin -p parqr_db -e "SHOW TABLES;"
+
+# Or using TCP connection if socket issues:
+mysql -u admin -h 127.0.0.1 -P 3306 -p parqr_db -e "SHOW TABLES;"
 ```
 
 You should see:
@@ -254,11 +420,14 @@ You should see:
 ### 2. Verify Table Structure
 ```bash
 # Check key table structures
-mysql -u parqr_admin -p parqr_db -e "
+mysql -u admin -p parqr_db -e "
 DESCRIBE users;
 DESCRIBE cars; 
 DESCRIBE parking_sessions;
 "
+
+# Or using TCP connection:
+mysql -u admin -h 127.0.0.1 -P 3306 -p parqr_db -e "DESCRIBE parking_sessions;"
 ```
 
 ### 3. Test Application Connection
@@ -308,6 +477,90 @@ alembic upgrade head
 alembic current
 ```
 
+## Complete Database Reset (Nuclear Option)
+
+If you encounter persistent database issues, corrupted migrations, or want a completely fresh start, follow these steps:
+
+### Option 1: Reset with MySQL Reinstall (Recommended for Clean State)
+
+```bash
+# 1. Stop MySQL service
+brew services stop mysql
+
+# 2. Completely uninstall MySQL
+brew uninstall mysql
+
+# 3. Remove MySQL data directory
+rm -rf /opt/homebrew/var/mysql
+
+# 4. Reinstall MySQL (fresh install, no root password)
+brew install mysql
+
+# 5. Start MySQL
+brew services start mysql
+
+# 6. Create database and user
+mysql -u root -e "
+CREATE USER 'admin'@'localhost' IDENTIFIED BY 'SQL-parqr-wkddusdn1!';
+CREATE DATABASE parqr_db;
+GRANT ALL PRIVILEGES ON parqr_db.* TO 'admin'@'localhost';
+FLUSH PRIVILEGES;
+"
+
+# 7. Apply all migrations
+alembic upgrade head
+
+# 8. Verify setup
+alembic current
+mysql -u admin -h 127.0.0.1 -P 3306 -p parqr_db -e "SHOW TABLES;"
+```
+
+### Option 2: Reset Database Only (Keep MySQL Installation)
+
+```bash
+# 1. Connect to MySQL as root
+mysql -u root -h 127.0.0.1 -P 3306 -e "
+DROP DATABASE IF EXISTS parqr_db;
+DROP USER IF EXISTS 'admin'@'localhost';
+CREATE USER 'admin'@'localhost' IDENTIFIED BY 'SQL-parqr-wkddusdn1!';
+CREATE DATABASE parqr_db;
+GRANT ALL PRIVILEGES ON parqr_db.* TO 'admin'@'localhost';
+FLUSH PRIVILEGES;
+"
+
+# 2. Reset Alembic migration history
+# (This tells Alembic to start fresh)
+rm -f alembic/versions/*.pyc
+rm -rf alembic/versions/__pycache__
+
+# 3. Apply all migrations from scratch
+alembic upgrade head
+
+# 4. Verify everything is working
+alembic current
+mysql -u admin -h 127.0.0.1 -P 3306 -p parqr_db -e "SHOW TABLES; DESCRIBE parking_sessions;"
+```
+
+### Option 3: Reset Alembic Only (Keep Database Structure)
+
+If only migration history is corrupted but database structure is correct:
+
+```bash
+# 1. Reset alembic version tracking
+mysql -u admin -h 127.0.0.1 -P 3306 -p parqr_db -e "DROP TABLE IF EXISTS alembic_version;"
+
+# 2. Mark current state as latest migration
+alembic stamp head
+
+# 3. Verify current state
+alembic current
+```
+
+### When to Use Each Option
+
+- **Option 1**: Use when you have forgotten MySQL root password, have socket connection issues, or want the cleanest possible setup
+- **Option 2**: Use when MySQL works fine but database/user setup is corrupted
+- **Option 3**: Use when database structure is correct but Alembic thinks migrations are out of sync
 
 ## Troubleshooting
 
@@ -325,16 +578,28 @@ brew services start mysql
 brew services restart mysql
 ```
 
-#### 2. Can't Connect to MySQL
+#### 2. Can't Connect to MySQL / Socket Issues
 ```bash
-# Verify MySQL is listening on port 3306
+# Check if MySQL is running and listening
+brew services list | grep mysql
 lsof -i :3306
 
-# Test connection manually
-mysql -u parqr_admin -p parqr_db
+# Try TCP connection instead of socket
+mysql -u admin -h 127.0.0.1 -P 3306 -p parqr_db
 
-# If access denied, check user permissions:
-mysql -u root -p -e "SELECT User, Host FROM mysql.user WHERE User='parqr_admin';"
+# If socket connection fails, always use TCP in .env:
+# DATABASE_URL=mysql+mysqldb://admin:SQL-parqr-wkddusdn1!@127.0.0.1:3306/parqr_db
+
+# Check user permissions:
+mysql -u root -h 127.0.0.1 -P 3306 -e "SELECT User, Host FROM mysql.user WHERE User='admin';"
+
+# If access denied, recreate user:
+mysql -u root -h 127.0.0.1 -P 3306 -e "
+DROP USER IF EXISTS 'admin'@'localhost';
+CREATE USER 'admin'@'localhost' IDENTIFIED BY 'SQL-parqr-wkddusdn1!';
+GRANT ALL PRIVILEGES ON parqr_db.* TO 'admin'@'localhost';
+FLUSH PRIVILEGES;
+"
 ```
 
 #### 3. mysqlclient Installation Problems
@@ -351,18 +616,54 @@ brew install pkg-config mysql-client
 pip install mysqlclient
 ```
 
-#### 4. Alembic Upgrade Fails
-```bash
-# Check current migration state
-alembic current
+#### 4. Alembic Migration Issues
 
-# If database is empty but alembic thinks it's migrated:
-alembic stamp base
+**Common Alembic problems and solutions:**
+
+```bash
+# Problem: "Table doesn't exist" during migration
+# Solution: Reset alembic and start fresh
+mysql -u admin -h 127.0.0.1 -P 3306 -p parqr_db -e "DROP TABLE IF EXISTS alembic_version;"
 alembic upgrade head
 
-# If migrations conflict:
+# Problem: "Duplicate column name" during migration  
+# Solution: Skip problematic migration
+alembic stamp <migration_id_to_skip>
+alembic upgrade head
+
+# Problem: Initial migration is empty (just 'pass')
+# This means you need to edit the initial migration file to create tables
+# See: alembic/versions/85b89fa95f39_initial_schema_reset.py
+
+# Problem: Migration order is wrong
+# Check migration history and dependencies:
 alembic history
-# Then manually resolve in alembic/versions/
+alembic show <migration_id>
+
+# Problem: Database exists but alembic thinks it's empty
+alembic stamp head  # Mark as current
+alembic current     # Verify
+
+# Problem: Want to start completely fresh
+# See "Complete Database Reset" section above
+```
+
+**Debugging Alembic Issues:**
+```bash
+# Check what Alembic thinks the current state is
+alembic current
+
+# Check the full migration history
+alembic history --verbose
+
+# Show details of a specific migration
+alembic show 85b89fa95f39
+
+# Check what changes Alembic would make (dry run)
+alembic upgrade head --sql
+
+# Manually fix migration state if needed
+alembic stamp <correct_migration_id>
 ```
 
 #### 5. Virtual Environment Issues
@@ -389,17 +690,40 @@ sudo chown -R $(whoami) /opt/homebrew/var/mysql
 If something goes wrong, here are the fastest recovery steps:
 
 ```bash
-# 1. Recreate database from scratch
-mysql -u root -p -e "DROP DATABASE IF EXISTS parqr_db; CREATE DATABASE parqr_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+# 1. Complete reset (nuclear option)
+brew services stop mysql
+brew uninstall mysql
+rm -rf /opt/homebrew/var/mysql
+brew install mysql
+brew services start mysql
 
-# 2. Reset alembic and apply all migrations
-alembic stamp base
+# 2. Recreate database and user
+mysql -u root -h 127.0.0.1 -P 3306 -e "
+CREATE USER 'admin'@'localhost' IDENTIFIED BY 'SQL-parqr-wkddusdn1!';
+CREATE DATABASE parqr_db;
+GRANT ALL PRIVILEGES ON parqr_db.* TO 'admin'@'localhost';
+FLUSH PRIVILEGES;
+"
+
+# 3. Apply all migrations
 alembic upgrade head
 
-# 3. Verify everything is working
+# 4. Verify everything is working
+alembic current
+mysql -u admin -h 127.0.0.1 -P 3306 -p parqr_db -e "SHOW TABLES;"
 python3 -c "from app.db.session import SessionLocal; print('✅ Database ready!')"
 ```
 
+### Key Points for Success
+
+1. **Always use TCP connections** (`127.0.0.1:3306`) instead of socket connections to avoid socket issues
+2. **Use consistent credentials** across all Mac devices: 
+   - User: `admin`
+   - Password: `SQL-parqr-wkddusdn1!`
+   - Database: `parqr_db`
+3. **Let Alembic handle schema**: Run `alembic upgrade head` to apply all migrations automatically
+4. **When in doubt, reset completely**: Use Option 1 in the "Complete Database Reset" section for a guaranteed clean state
+
 ---
 
-**That's it!** This streamlined setup ensures you can quickly get parQR running on any Mac device. The key is using consistent credentials and letting Alembic handle all the schema management with `alembic upgrade head`.
+**That's it!** This comprehensive guide covers everything from basic setup to complete troubleshooting. The database setup process we just went through (MySQL reset + Alembic migrations) is now documented as the standard approach for any parQR setup issues.
