@@ -3,6 +3,8 @@ import { DEV_CONFIG } from './development';
 
 const API_BASE_URL = DEV_CONFIG.EXPO_PUBLIC_LOCAL_API_BASE_URL;
 
+console.log('🌐 API Base URL:', API_BASE_URL); // Debug log
+
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
@@ -11,23 +13,49 @@ export const apiClient = axios.create({
   },
 });
 
-// Request interceptor for adding auth tokens (future use)
+// Request interceptor for debugging and auth
 apiClient.interceptors.request.use(
   (config) => {
-    // Add auth token when implemented
+    if (__DEV__) {
+      console.log('📤 API Request:', {
+        method: config.method?.toUpperCase(),
+        url: config.url,
+        baseURL: config.baseURL,
+        fullURL: `${config.baseURL}${config.url}`,
+        data: config.data
+      });
+    }
     return config;
   },
   (error) => {
+    console.error('❌ Request Error:', error);
     return Promise.reject(error);
   }
 );
 
-// Response interceptor for handling errors
+// Response interceptor for debugging and error handling
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (__DEV__) {
+      console.log('✅ API Response:', {
+        status: response.status,
+        url: response.config.url,
+        data: response.data
+      });
+    }
+    return response;
+  },
   (error) => {
     if (__DEV__) {
-      console.log('API Error:', error.response?.data || error.message);
+      console.error('❌ API Error Details:', {
+        message: error.message,
+        code: error.code,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        responseData: error.response?.data,
+        requestURL: error.config?.url,
+        fullURL: `${error.config?.baseURL}${error.config?.url}`
+      });
     }
     return Promise.reject(error);
   }

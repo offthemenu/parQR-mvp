@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,46 +9,24 @@ import {
   Platform,
 } from 'react-native';
 import { UserService } from '../services/userService';
-import { RegisterUserResponse, CountryInfo } from '../types';
+import { RegisterUserResponse, KOREAN_PHONE_CONFIG } from '../types';
 import { 
   validatePhoneNumber, 
   formatPhoneNumber, 
-  formatPhoneForAPI,
-  validateRequired 
+  formatPhoneForAPI 
 } from '../utils/validation';
-import { CountryPicker } from '../components/CountryPicker';
 import { PhoneNumberInput } from '../components/PhoneNumberInput';
 import { RegistrationSuccess } from '../components/RegistrationSuccess';
 import { registerScreenStyles } from '../styles/registerScreenStyles';
 
 export const RegisterScreen: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [selectedCountry, setSelectedCountry] = useState<string>('KR');
-  const [countries, setCountries] = useState<CountryInfo[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isLoadingCountries, setIsLoadingCountries] = useState<boolean>(true);
   const [userData, setUserData] = useState<RegisterUserResponse | null>(null);
   const [showQR, setShowQR] = useState<boolean>(false);
 
-  // Load countries on component mount
-  useEffect(() => {
-    loadCountries();
-  }, []);
-
-  const loadCountries = async () => {
-    try {
-      const response = await UserService.getServicingCountries();
-      setCountries(response.countries);
-      // Set default to first country if available
-      if (response.countries.length > 0) {
-        setSelectedCountry(response.countries[0].iso_code);
-      }
-    } catch (error: any) {
-      Alert.alert('Error', 'Failed to load countries. Please try again.');
-    } finally {
-      setIsLoadingCountries(false);
-    }
-  };
+  // Hardcoded to South Korea for MVP
+  const selectedCountry = KOREAN_PHONE_CONFIG.COUNTRY_ISO;
 
   const handlePhoneNumberChange = (text: string) => {
     // Format phone number as user types based on selected country
@@ -57,26 +35,21 @@ export const RegisterScreen: React.FC = () => {
   };
 
   const handleRegister = async () => {
-    // Validate required fields
+    // Validate phone number
     const phoneValidation = validatePhoneNumber(phoneNumber, { countryCode: selectedCountry });
-    const countryValidation = validateRequired(selectedCountry, 'Country');
 
     if (!phoneValidation.isValid) {
       Alert.alert('Invalid Phone Number', phoneValidation.message || 'Please enter a valid phone number');
       return;
     }
 
-    if (!countryValidation.isValid) {
-      Alert.alert('Country Required', countryValidation.message || 'Please select a country');
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      // Format phone number for API call
+      // Format phone number for API call (raw format: 010XXXXXXXX)
       const apiFormattedPhone = formatPhoneForAPI(phoneNumber, selectedCountry);
-      const response = await UserService.registerUser(apiFormattedPhone, selectedCountry);
+      // Hardcode South Korea for MVP
+      const response = await UserService.registerUser(apiFormattedPhone, KOREAN_PHONE_CONFIG.COUNTRY_ISO);
       
       setUserData(response);
       setShowQR(true);
@@ -94,27 +67,19 @@ export const RegisterScreen: React.FC = () => {
 
   const handleStartOver = () => {
     setPhoneNumber('');
-    setSelectedCountry(countries.length > 0 ? countries[0].iso_code : 'KR');
     setUserData(null);
     setShowQR(false);
   };
-
 
   if (showQR && userData) {
     return (
       <RegistrationSuccess
         userData={userData}
         selectedCountry={selectedCountry}
-        countries={countries}
         onStartOver={handleStartOver}
       />
     );
   }
-
-  const handleCountryChange = (countryCode: string) => {
-    setSelectedCountry(countryCode);
-    setPhoneNumber('');
-  };
 
   return (
     <KeyboardAvoidingView
@@ -123,15 +88,7 @@ export const RegisterScreen: React.FC = () => {
     >
       <View style={registerScreenStyles.formContainer}>
         <Text style={registerScreenStyles.title}>Welcome to parQR</Text>
-        <Text style={registerScreenStyles.subtitle}>Select your country and enter your phone number</Text>
-
-        <CountryPicker
-          selectedCountry={selectedCountry}
-          countries={countries}
-          isLoading={isLoading}
-          isLoadingCountries={isLoadingCountries}
-          onCountryChange={handleCountryChange}
-        />
+        <Text style={registerScreenStyles.subtitle}>Enter your Korean phone number</Text>
 
         <PhoneNumberInput
           phoneNumber={phoneNumber}

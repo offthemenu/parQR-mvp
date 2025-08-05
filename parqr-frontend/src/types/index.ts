@@ -32,8 +32,8 @@ export interface ParkingSession {
 
 // API Request/Response types
 export interface RegisterUserRequest {
-  phone_number: string;
-  signup_country_iso: string;
+  phone_number: string; // Raw format: 010XXXXXXXX
+  signup_country_iso?: string; // Defaults to 'KR' for South Korea MVP
 }
 
 export interface RegisterUserResponse {
@@ -60,6 +60,12 @@ export type RootStackParamList = {
   Profile: { user: User };
 };
 
+// Phone number formatting types
+export interface PhoneFormatting {
+  raw: string;      // 010XXXXXXXX (sent to API)
+  display: string;  // 010-XXXX-XXXX (shown to user)
+}
+
 // Validation types
 export interface ValidationResult {
   isValid: boolean;
@@ -67,9 +73,17 @@ export interface ValidationResult {
 }
 
 export interface PhoneValidationOptions {
-  countryCode?: string;
+  countryCode?: string; // Default: 'KR' for MVP
   allowInternational?: boolean;
 }
+
+// Korean phone number constants
+export const KOREAN_PHONE_CONFIG = {
+  COUNTRY_ISO: 'KR',
+  PHONE_PREFIX: '010',
+  RAW_LENGTH: 11, // 010XXXXXXXX
+  DISPLAY_FORMAT: 'XXX-XXXX-XXXX'
+} as const;
 
 // API Error type
 export interface ApiError {
