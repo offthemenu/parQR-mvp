@@ -56,8 +56,11 @@ export interface CountryInfo {
 
 // Navigation types
 export type RootStackParamList = {
+  Splash: undefined;
+  SignIn: undefined;
   Register: undefined;
-  Profile: { user: User };
+  Home: { user: RegisterUserResponse };
+  Profile: { user: RegisterUserResponse };
 };
 
 // Phone number formatting types

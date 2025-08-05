@@ -1,7 +1,10 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import QRCode from 'react-native-qrcode-svg';
-import { RegisterUserResponse } from '../types';
+import { View, Text, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RegisterUserResponse, RootStackParamList } from '../types';
+import { QRCodeDisplay } from '../components/QRCodeDisplay';
+import { ActionButton } from '../components/ActionButton';
 import { registrationSuccessStyles } from '../styles/registrationSuccessStyles';
 
 interface RegistrationSuccessProps {
@@ -10,14 +13,22 @@ interface RegistrationSuccessProps {
   onStartOver: () => void;
 }
 
+type RegistrationSuccessNavigationProp = StackNavigationProp<RootStackParamList>;
+
 export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
   userData,
   selectedCountry,
   onStartOver,
 }) => {
+  const navigation = useNavigation<RegistrationSuccessNavigationProp>();
+
   const getCountryName = (countryCode: string): string => {
-    // Hardcoded for South Korea MVP
     return countryCode === 'KR' ? 'South Korea' : countryCode;
+  };
+
+  const handleContinueToHome = () => {
+    // Navigate to home screen with user data
+    navigation.replace('Home', { user: userData });
   };
 
   return (
@@ -33,21 +44,26 @@ export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
 
         <View style={registrationSuccessStyles.qrContainer}>
           <Text style={registrationSuccessStyles.qrTitle}>Your QR Code:</Text>
-          <QRCode
-            value={userData.qr_code_id}
+          <QRCodeDisplay
+            qrCodeId={userData.qr_code_id}
             size={200}
-            backgroundColor="white"
-            color="black"
+            showId={true}
           />
-          <Text style={registrationSuccessStyles.qrSubtext}>QR ID: {userData.qr_code_id}</Text>
         </View>
 
-        <TouchableOpacity 
-          style={registrationSuccessStyles.button} 
+        {/* Primary action - Continue to app */}
+        <ActionButton
+          title="Continue to App"
+          onPress={handleContinueToHome}
+          variant="primary"
+        />
+
+        {/* Secondary action - Register another user */}
+        <ActionButton
+          title="Register Another User"
           onPress={onStartOver}
-        >
-          <Text style={registrationSuccessStyles.buttonText}>Register Another User</Text>
-        </TouchableOpacity>
+          variant="secondary"
+        />
       </View>
     </ScrollView>
   );
