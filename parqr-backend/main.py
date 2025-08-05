@@ -24,13 +24,15 @@ origins = [
     "http://localhost:19006",     # Expo development server
     "http://127.0.0.1:3000",
     "http://127.0.0.1:19006",
-    "null",                       # For local HTML files (file:// protocol)
+    "http://192.168.1.30:19006",  # Your specific IP for Expo
+    "http://192.168.1.30:8081",   # Metro bundler
+    "exp://192.168.1.30:8081",    # Expo scheme
+    "null",                       # For local HTML files
 ]
 
-# Add production origins from environment variable
-if os.getenv("CORS_ORIGINS"):
-    production_origins = os.getenv("CORS_ORIGINS").split(",")
-    origins.extend(production_origins)
+# For development: Allow all origins (ONLY for development!)
+if os.getenv("DEV_MODE", "false").lower() == "true":
+    origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -50,4 +52,9 @@ app.include_router(signup.router, prefix = "/api")
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8010)
+    uvicorn.run(
+        app, 
+        host="0.0.0.0",
+        port=8010,
+        log_level="info"
+    )

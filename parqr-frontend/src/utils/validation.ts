@@ -113,10 +113,7 @@ export const formatPhoneForAPI = (
   
   switch (countryCode.toUpperCase()) {
     case 'KR': // South Korea - convert to international format
-      if (cleanPhone.startsWith('010')) {
-        // Remove leading 0 and add +82
-        return `+82${cleanPhone.substring(1)}`;
-      }
+      if (cleanPhone.startsWith('010'))
       return cleanPhone;
     default:
       // For other countries, return as-is for now
