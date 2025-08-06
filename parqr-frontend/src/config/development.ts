@@ -1,13 +1,21 @@
-export const DEV_CONFIG = {
-  // For Expo development - use your computer's IP address for physical device testing
-  // For iOS Simulator: localhost works
-  // For Android Emulator: 10.0.2.2 or localhost works  
-  // For Physical Device: Use your computer's actual IP address
-  EXPO_PUBLIC_LOCAL_API_BASE_URL: 'http://192.168.1.30:8010/api', // Change this to your IP if testing on device
-  
-  // Alternative URLs for different scenarios:
-  // EXPO_PUBLIC_LOCAL_API_BASE_URL: 'http://192.168.1.XXX:8010/api', // Replace XXX with your IP
-  // EXPO_PUBLIC_LOCAL_API_BASE_URL: 'http://10.0.0.XXX:8010/api',     // Alternative IP range
-  
+// Default development configuration
+const DEFAULT_DEV_CONFIG = {
+  // Default fallback URL (works for iOS Simulator and some Android setups)
+  EXPO_PUBLIC_LOCAL_API_BASE_URL: 'http://localhost:8010/api',
   ENABLE_LOGGING: __DEV__,
+};
+
+// Try to load local development config (machine-specific, gitignored)
+let localConfig = {};
+try {
+  localConfig = require('./development.local').LOCAL_DEV_CONFIG;
+} catch (error) {
+  // development.local.ts doesn't exist - that's fine, use defaults
+  console.log('No local development config found. Copy development.local.example.ts to development.local.ts and customize for your machine.');
+}
+
+// Merge default config with local overrides
+export const DEV_CONFIG = {
+  ...DEFAULT_DEV_CONFIG,
+  ...localConfig,
 };
