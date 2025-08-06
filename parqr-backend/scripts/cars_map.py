@@ -19,7 +19,7 @@ CARS_AVAILABLE = {
   "Genesis": ["Electrified G80", "Electrified GV70", "G70", "G80", "G90", "GV60", "GV70", "GV80"],
   "GMC": ["Acadia", "Canyon", "Hummer EV", "Hummer EV SUV", "Sierra 1500", "Sierra 2500HD", "Sierra 3500HD", "Terrain", "Yukon", "Yukon XL"],
   "Honda": ["Accord", "Accord Hybrid", "Civic", "Civic Hatchback", "Civic Hybrid", "Civic Si", "Civic Type R", "CR-V", "CR-V Hybrid", "HR-V", "Odyssey", "Passport", "Pilot", "Prologue", "Ridgeline"],
-  "Hyundai": ["Elantra", "Elantra Hybrid", "Elantra N", "Ioniq 5", "Ioniq 6", "Kona", "Kona Electric", "Kona N", "Nexo", "Palisade", "Santa Cruz", "Santa Fe", "Santa Fe Hybrid", "Sonata", "Sonata Hybrid", "Tucson", "Tucson Hybrid", "Tucson Plug-in Hybrid", "Venue"],
+  "Hyundai": ["Avante", "Avante Hybrid", "Avante N", "Ioniq 5", "Ioniq 6", "Kona", "Kona Electric", "Kona N", "Nexo", "Palisade", "Santa Cruz", "Santa Fe", "Santa Fe Hybrid", "Sonata", "Sonata Hybrid", "Tucson", "Tucson Hybrid", "Tucson Plug-in Hybrid", "Venue"],
   "Infiniti": ["Q50", "Q60", "QX50", "QX55", "QX60", "QX80"],
   "Jaguar": ["E-Pace", "F-Pace", "F-Type", "I-Pace", "XE", "XF"],
   "Jeep": ["Cherokee", "Compass", "Gladiator", "Grand Cherokee", "Grand Cherokee 4xe", "Grand Cherokee L", "Grand Wagoneer", "Wagoneer", "Wrangler", "Wrangler 4xe"],
