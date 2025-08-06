@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.base import get_db
 from app.models.user import User
-from app.schemas.user_schema import UserRegisterRequest, UserResponse, UserPublicResponse
+from app.schemas.user_schema import UserRegisterRequest, UserResponse, UserPublicResponse, UserWithCarsResponse
 from app.dependencies.auth import get_current_user
 import secrets
 import string
@@ -127,6 +127,54 @@ def get_public_user_info(
         qr_code_id=user.qr_code_id,
         signup_country_iso=user.signup_country_iso
     )
+
+@router.get("/lookup/{user_code}", response_model=UserWithCarsResponse)
+def lookup_user(
+    user_code: str,
+    db: Session = Depends(get_db)
+):
+    """Look up user by user_code for sign-in flow"""
+    logger.info(f"User lookup request for user_code: {user_code}")
+
+    user = db.query(User).filter(User.user_code == user_code).first()
+
+    if not user:
+        logger.warning(f"User not found for user_code: {user_code}")
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "error": "user_not_found",
+                "message": "No account found with this user code"
+            }
+        )
+    
+    # Get user's cars
+    from app.models.car import Car
+    cars = db.query(Car).filter(Car.owner_id == user.id).all()
+
+    # Convert cars to dict format (excluding license_plate for privacy)
+    cars_data = [
+        {
+            "id": car.id,
+            "car_brand": car.car_brand,
+            "car_model": car.car_model,
+            "created_at": car.created_at.isoformat()
+        }
+        for car in cars
+    ]
+
+    # Create response (excluding phone_number for privacy)
+    response_data = UserWithCarsResponse(
+        id=user.id,
+        user_code=user.user_code,
+        qr_code_id=user.qr_code_id,
+        created_at=user.created_at,
+        signup_country_iso=user.signup_country_iso,
+        cars=cars_data
+    )
+    
+    logger.info(f"User lookup successful: {user.user_code} with {len(cars_data)} cars")
+    return response_data
 
 @router.post("/regenerate-qr", response_model=UserResponse)
 def regenerate_user_qr_code(

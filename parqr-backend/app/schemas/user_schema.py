@@ -23,3 +23,15 @@ class UserPublicResponse(BaseModel):
     signup_country_iso: str
     
     model_config = {"from_attributes": True}
+
+class UserWithCarsResponse(BaseModel):
+    """User data with associated cars (for sign-in flow)"""
+
+    id: int
+    user_code: str
+    qr_code_id: str
+    created_at: datetime
+    signup_country_iso: str
+    cars: list[dict] = [] # populated with car data
+
+    model_config = {"from_attributes": True}

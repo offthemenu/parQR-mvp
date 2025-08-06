@@ -1,11 +1,35 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional
 from datetime import datetime
+import re
 
 class CarRegisterRequest(BaseModel):
     license_plate: str
     car_brand: str
     car_model: str
+
+    @field_validator('license_plate')
+    def validate_korean_license_plate(cls, v):
+        # Korean license plate format: 123가4567 or 123나4567, etc.
+        korean_plate_pattern = r'^\d{2,3}[가-힣]\d{4}$'
+
+        if not re.match(korean_plate_pattern, v):
+            raise ValueError('License plate must follow Korean format (e.g., 123가4567)')
+
+        return v
+
+    @field_validator('car_brand')
+    def validate_car_brand(cls, v):
+        if not v or len(v.strip()) < 2:
+            raise ValueError('Car brand must be at least 2 characters')
+        return v.strip().title()
+
+    @field_validator('car_model')
+    def validate_car_model(cls, v):
+        if not v or len(v.strip()) < 1:
+            raise ValueError('Car model is required')
+        return v.strip().title()
+
 
 class CarResponse(BaseModel):
     id: int

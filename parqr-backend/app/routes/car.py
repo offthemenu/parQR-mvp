@@ -21,24 +21,36 @@ def register_car(
     existing_car = db.query(Car).filter(
         Car.license_plate == car_data.license_plate
     ).first()
-    
+
     if existing_car:
-        raise HTTPException(status_code=400, detail="License plate already registered")
-    
-    model_data = car_data.model_dump()
-    model_data['owner_id'] = current_user.id
-    
-    logger.info(f"Car registration data: {model_data}")
-    logger.info(f"Creating car for user_id: {current_user.id}")
-    
-    new_car = Car(**model_data)
-    
-    db.add(new_car)
-    db.commit()
-    db.refresh(new_car)
-    
-    logger.info(f"Car registered successfully with ID: {new_car.id}, license_plate: {new_car.license_plate}")
-    return new_car
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "duplicate_license_plate",
+                "message": "This license plate is already registered in the system"
+            }
+        )
+
+    try:
+        model_data = car_data.model_dump()
+        model_data['owner_id'] = current_user.id
+
+        logger.info(f"Car registration data: {model_data}")
+        logger.info(f"Creating car for user_id: {current_user.id}")
+
+        new_car = Car(**model_data)
+
+        db.add(new_car)
+        db.commit()
+        db.refresh(new_car)
+
+        logger.info(f"Car registered successfully with ID: {new_car.id}, license_plate: {new_car.license_plate}")
+        return new_car
+
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Car registration failed: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Registration failed: {str(e)}")
 
 @router.get("/my-cars", response_model=list[CarResponse])
 def get_user_cars(
