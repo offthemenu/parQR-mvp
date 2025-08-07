@@ -8,6 +8,15 @@ export interface User {
   created_at: string;
 }
 
+export interface UserWithCarsResponse {
+  id: number;
+  user_code: string;
+  qr_code_id: string;
+  created_at: string;
+  signup_country_iso: string;
+  cars: CarResponse[];
+}
+
 // Car related types
 export interface Car {
   id: number;
@@ -16,6 +25,25 @@ export interface Car {
   car_brand?: string;
   car_model?: string;
   created_at: string;
+}
+
+// Car response type for owner context (includes license plate)
+export interface CarOwnerResponse {
+  id: number;
+  license_plate: string;
+  car_brand: string;
+  car_model: string;
+  created_at: string;
+  // Note: owner_id excluded for privacy
+}
+
+// Car response type (privacy-preserving - matches backend UserWithCarsResponse)
+export interface CarResponse {
+  id: number;
+  car_brand: string;
+  car_model: string;
+  created_at: string;
+  // Note: license_plate and owner_id excluded for privacy
 }
 
 // Parking session related types
@@ -34,6 +62,13 @@ export interface ParkingSession {
 export interface RegisterUserRequest {
   phone_number: string; // Raw format: 010XXXXXXXX
   signup_country_iso?: string; // Defaults to 'KR' for South Korea MVP
+}
+
+// Car Registration Types
+export interface CarRegistrationRequest {
+  license_plate: string;
+  car_brand: string;
+  car_model: string;
 }
 
 export interface RegisterUserResponse {
@@ -59,8 +94,15 @@ export type RootStackParamList = {
   Splash: undefined;
   SignIn: undefined;
   Register: undefined;
-  Home: { user: RegisterUserResponse };
-  Profile: { user: RegisterUserResponse };
+  CarRegistration: {
+    user: UserWithCarsResponse;
+  };
+  Home: {
+    user: RegisterUserResponse | UserWithCarsResponse;
+  };
+  Profile: {
+    user: RegisterUserResponse | UserWithCarsResponse;
+  };
 };
 
 // Phone number formatting types
@@ -93,3 +135,24 @@ export interface ApiError {
   message: string;
   status: number;
 }
+
+// Korean Car Brands for Dropdown
+export const KOREAN_CAR_BRANDS = [
+  'Hyundai',
+  'Kia',
+  'Genesis',
+  'SsangYong',
+  'Toyota',
+  'Honda',
+  'BMW',
+  'Mercedes-Benz',
+  'Audi',
+  'Volkswagen',
+  'Nissan',
+  'Mazda',
+  'Ford',
+  'Chevrolet'
+] as const;
+
+// License Plate Validation
+export const KOREAN_LICENSE_PLATE_REGEX = /^\d{2,3}[가-힣]\d{4}$/;
