@@ -3,7 +3,8 @@ import {
   RegisterUserRequest, 
   RegisterUserResponse, 
   ServicingCountriesResponse,
-  User
+  User,
+  UserWithCarsResponse
 } from '../types';
 
 export class UserService {
@@ -69,6 +70,19 @@ export class UserService {
     }
   }
 
+  /**
+   * Look up user by user_code for sign-in
+   */
+  static async lookupUser(userCode: string): Promise<UserWithCarsResponse> {
+    try {
+      const response = await apiClient.get(`/v01/user/lookup/${userCode}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('User lookup error:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+  
   /**
    * Regenerate QR code for current user
    */
