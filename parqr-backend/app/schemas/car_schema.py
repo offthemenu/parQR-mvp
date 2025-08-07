@@ -31,13 +31,24 @@ class CarRegisterRequest(BaseModel):
         return v.strip().title()
 
 
-class CarResponse(BaseModel):
+class CarOwnerResponse(BaseModel):
+    """Full car data for owner only - includes sensitive license plate"""
     id: int
     license_plate: str
     car_brand: str
     car_model: str
     created_at: datetime
     # Note: owner_id excluded for privacy
+    
+    model_config = {"from_attributes": True}
+
+class CarResponse(BaseModel):
+    """Privacy-preserving car data for shared contexts - excludes license plate"""
+    id: int
+    car_brand: str
+    car_model: str
+    created_at: datetime
+    # Note: license_plate and owner_id excluded for privacy
     
     model_config = {"from_attributes": True}
 

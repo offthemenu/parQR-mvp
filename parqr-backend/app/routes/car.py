@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.db.base import get_db
 from app.models.car import Car
 from app.models.user import User
-from app.schemas.car_schema import CarRegisterRequest, CarResponse, CarPublicResponse
+from app.schemas.car_schema import CarRegisterRequest, CarResponse, CarOwnerResponse, CarPublicResponse
 from app.dependencies.auth import get_current_user
 import logging
 
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/v01/car", tags=["car"])
 
-@router.post("/register", response_model=CarResponse)
+@router.post("/register", response_model=CarOwnerResponse)
 def register_car(
     car_data: CarRegisterRequest,
     db: Session = Depends(get_db),
@@ -52,12 +52,12 @@ def register_car(
         logger.error(f"Car registration failed: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Registration failed: {str(e)}")
 
-@router.get("/my-cars", response_model=list[CarResponse])
+@router.get("/my-cars", response_model=list[CarOwnerResponse])
 def get_user_cars(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Get current user's cars - owner_id excluded from response"""
+    """Get current user's cars - includes license plates since owner is accessing their own data"""
     logger.info(f"Fetching cars for user_id: {current_user.id}")
     
     cars = db.query(Car).filter(Car.owner_id == current_user.id).all()
