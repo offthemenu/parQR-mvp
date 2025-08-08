@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { SignInScreen } from './src/screens/SignInScreen';
 import { RegisterScreen } from './src/screens/RegisterScreen';
+import { CarRegistrationScreen } from './src/screens/CarRegistrationScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { ProfileScreen } from './src/screens/ProfileScreen';
 import { RootStackParamList } from './src/types';
@@ -44,6 +45,15 @@ export default function App() {
           options={{ 
             title: 'parQR Registration',
             headerBackTitle: ' '
+          }}
+        />
+        <Stack.Screen 
+          name="CarRegistration" 
+          component={CarRegistrationScreen}
+          options={{ 
+            title: 'Add Your Car',
+            headerLeft: () => null, // Remove back button
+            gestureEnabled: false // Disable swipe back
           }}
         />
         <Stack.Screen 
