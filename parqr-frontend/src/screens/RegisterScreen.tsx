@@ -8,8 +8,11 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { UserService } from '../services/userService';
-import { RegisterUserResponse, KOREAN_PHONE_CONFIG } from '../types';
+import { AuthService } from '../services/authService';
+import { RegisterUserResponse, KOREAN_PHONE_CONFIG, RootStackParamList } from '../types';
 import { 
   validatePhoneNumber, 
   formatPhoneNumber, 
@@ -19,7 +22,10 @@ import { PhoneNumberInput } from '../components/PhoneNumberInput';
 import { RegistrationSuccess } from '../components/RegistrationSuccess';
 import { registerScreenStyles } from '../styles/registerScreenStyles';
 
+type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
+
 export const RegisterScreen: React.FC = () => {
+  const navigation = useNavigation<RegisterScreenNavigationProp>();
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<RegisterUserResponse | null>(null);
@@ -48,15 +54,41 @@ export const RegisterScreen: React.FC = () => {
     try {
       // Format phone number for API call (raw format: 010XXXXXXXX)
       const apiFormattedPhone = formatPhoneForAPI(phoneNumber, selectedCountry);
-      // Hardcode South Korea for MVP
       const response = await UserService.registerUser(apiFormattedPhone, KOREAN_PHONE_CONFIG.COUNTRY_ISO);
+      
+      // Store user code in AsyncStorage
+      await AuthService.storeUserCode(response.user_code);
       
       setUserData(response);
       setShowQR(true);
       
       Alert.alert(
         'Registration Successful!', 
-        `Welcome! Your user code is: ${response.user_code}`
+        `Welcome! Your user code is: ${response.user_code}`,
+        [
+          {
+            text: 'Continue',
+            onPress: () => {
+              // Navigate to car registration
+              navigation.reset({
+                index: 0,
+                routes: [{ 
+                  name: 'CarRegistration', 
+                  params: { 
+                    user: {
+                      id: response.id,
+                      user_code: response.user_code,
+                      qr_code_id: response.qr_code_id,
+                      created_at: response.created_at,
+                      signup_country_iso: response.signup_country_iso,
+                      cars: []
+                    }
+                  }
+                }],
+              });
+            }
+          }
+        ]
       );
     } catch (error: any) {
       Alert.alert('Registration Failed', error.message);
