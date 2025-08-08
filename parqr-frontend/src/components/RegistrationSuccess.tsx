@@ -10,7 +10,6 @@ import { registrationSuccessStyles } from '../styles/registrationSuccessStyles';
 interface RegistrationSuccessProps {
   userData: RegisterUserResponse;
   selectedCountry: string;
-  onStartOver: () => void;
 }
 
 type RegistrationSuccessNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -18,7 +17,6 @@ type RegistrationSuccessNavigationProp = StackNavigationProp<RootStackParamList>
 export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
   userData,
   selectedCountry,
-  onStartOver,
 }) => {
   const navigation = useNavigation<RegistrationSuccessNavigationProp>();
 
@@ -29,6 +27,26 @@ export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
   const handleContinueToHome = () => {
     // Navigate to home screen with user data
     navigation.replace('Home', { user: userData });
+  };
+
+  const handleRegisterCar = () => {
+    // Navigate to car registration screen
+    navigation.reset({
+      index: 0,
+      routes: [{ 
+        name: 'CarRegistration', 
+        params: { 
+          user: {
+            id: userData.id,
+            user_code: userData.user_code,
+            qr_code_id: userData.qr_code_id,
+            created_at: userData.created_at,
+            signup_country_iso: userData.signup_country_iso,
+            cars: []
+          }
+        }
+      }],
+    });
   };
 
   return (
@@ -51,17 +69,17 @@ export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
           />
         </View>
 
-        {/* Primary action - Continue to app */}
+        {/* Primary action - Register car */}
         <ActionButton
-          title="Continue to App"
-          onPress={handleContinueToHome}
+          title="Register Your Car"
+          onPress={handleRegisterCar}
           variant="primary"
         />
 
-        {/* Secondary action - Register another user */}
+        {/* Secondary action - Skip car registration */}
         <ActionButton
-          title="Register Another User"
-          onPress={onStartOver}
+          title="Skip for Now"
+          onPress={handleContinueToHome}
           variant="secondary"
         />
       </View>

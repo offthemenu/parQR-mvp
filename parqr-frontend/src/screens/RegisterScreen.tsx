@@ -8,11 +8,9 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
 import { UserService } from '../services/userService';
 import { AuthService } from '../services/authService';
-import { RegisterUserResponse, KOREAN_PHONE_CONFIG, RootStackParamList } from '../types';
+import { RegisterUserResponse, KOREAN_PHONE_CONFIG } from '../types';
 import { 
   validatePhoneNumber, 
   formatPhoneNumber, 
@@ -22,10 +20,7 @@ import { PhoneNumberInput } from '../components/PhoneNumberInput';
 import { RegistrationSuccess } from '../components/RegistrationSuccess';
 import { registerScreenStyles } from '../styles/registerScreenStyles';
 
-type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
-
 export const RegisterScreen: React.FC = () => {
-  const navigation = useNavigation<RegisterScreenNavigationProp>();
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<RegisterUserResponse | null>(null);
@@ -64,31 +59,7 @@ export const RegisterScreen: React.FC = () => {
       
       Alert.alert(
         'Registration Successful!', 
-        `Welcome! Your user code is: ${response.user_code}`,
-        [
-          {
-            text: 'Continue',
-            onPress: () => {
-              // Navigate to car registration
-              navigation.reset({
-                index: 0,
-                routes: [{ 
-                  name: 'CarRegistration', 
-                  params: { 
-                    user: {
-                      id: response.id,
-                      user_code: response.user_code,
-                      qr_code_id: response.qr_code_id,
-                      created_at: response.created_at,
-                      signup_country_iso: response.signup_country_iso,
-                      cars: []
-                    }
-                  }
-                }],
-              });
-            }
-          }
-        ]
+        `Welcome! Your user code is: ${response.user_code}`
       );
     } catch (error: any) {
       Alert.alert('Registration Failed', error.message);
@@ -97,18 +68,11 @@ export const RegisterScreen: React.FC = () => {
     }
   };
 
-  const handleStartOver = () => {
-    setPhoneNumber('');
-    setUserData(null);
-    setShowQR(false);
-  };
-
   if (showQR && userData) {
     return (
       <RegistrationSuccess
         userData={userData}
         selectedCountry={selectedCountry}
-        onStartOver={handleStartOver}
       />
     );
   }
