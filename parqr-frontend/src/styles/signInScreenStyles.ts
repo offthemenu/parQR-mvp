@@ -3,35 +3,67 @@ import { StyleSheet } from 'react-native';
 export const signInScreenStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     padding: 20,
   },
   header: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 50,
+    marginTop: 60,
+    marginBottom: 40,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 10,
-    textAlign: 'center',
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
-    marginHorizontal: 20,
+  },
+  formContainer: {
+    marginBottom: 30,
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 15,
+    fontSize: 16,
+    backgroundColor: '#f9f9f9',
+  },
+  signInButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  signInButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
   buttonContainer: {
-    gap: 15,
     marginBottom: 40,
   },
+  buttonDisabled: {
+    backgroundColor: '#ccc',
+  },
   footer: {
+    flex: 1,
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    paddingBottom: 30,
   },
   footerText: {
     fontSize: 14,
