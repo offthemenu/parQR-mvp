@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { DEV_CONFIG } from './development';
+import { AuthService } from '../services/authService';
 
 const API_BASE_URL = DEV_CONFIG.EXPO_PUBLIC_LOCAL_API_BASE_URL;
 
@@ -15,14 +16,21 @@ export const apiClient = axios.create({
 
 // Request interceptor for debugging and auth
 apiClient.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    // Add authentication header if user is logged in
+    const userCode = await AuthService.getUserCode();
+    if (userCode) {
+      config.headers['x-user-code'] = userCode;
+    }
+
     if (__DEV__) {
       console.log('📤 API Request:', {
         method: config.method?.toUpperCase(),
         url: config.url,
         baseURL: config.baseURL,
         fullURL: `${config.baseURL}${config.url}`,
-        data: config.data
+        data: config.data,
+        headers: config.headers
       });
     }
     return config;

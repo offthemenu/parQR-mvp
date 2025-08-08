@@ -88,4 +88,25 @@ export const carRegistrationStyles = StyleSheet.create({
     fontSize: 14,
     marginTop: 5,
   },
+  brandSelector: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 15,
+    backgroundColor: '#f9f9f9',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  brandSelectorText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  brandSelectorPlaceholder: {
+    color: '#999',
+  },
+  brandSelectorArrow: {
+    fontSize: 12,
+    color: '#666',
+  },
 });

@@ -9,8 +9,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActionSheetIOS,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -19,7 +19,7 @@ import {
   CarRegistrationRequest,
   KOREAN_CAR_BRANDS,
   KOREAN_LICENSE_PLATE_REGEX
-} from '../types';
+} from '../types/index';
 import { CarService } from '../services/carService';
 import { AuthService } from '../services/authService';
 import { carRegistrationStyles } from '../styles/carRegistrationStyles';
@@ -69,13 +69,53 @@ export const CarRegistrationScreen: React.FC = () => {
   };
 
   const handleLicensePlateChange = (text: string) => {
-    // Remove any non-Korean characters and format
-    const cleaned = text.replace(/[^0-9가-힣]/g, '');
+    // Allow numbers and Korean characters (including consonants and vowels)
+    const cleaned = text.replace(/[^0-9ㄱ-ㅎㅏ-ㅣ가-힣]/g, '');
     setLicensePlate(cleaned);
 
     // Clear error when user starts typing
     if (errors.licensePlate) {
       setErrors(prev => ({ ...prev, licensePlate: '' }));
+    }
+  };
+
+  const handleBrandSelection = () => {
+    const options = ['Cancel', ...KOREAN_CAR_BRANDS];
+    
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex: 0,
+          title: 'Select Car Brand',
+        },
+        (buttonIndex) => {
+          if (buttonIndex > 0) {
+            setSelectedBrand(KOREAN_CAR_BRANDS[buttonIndex - 1]);
+            if (errors.brand) {
+              setErrors(prev => ({ ...prev, brand: '' }));
+            }
+          }
+        }
+      );
+    } else {
+      // For Android, show Alert with options (or you could implement a Modal)
+      Alert.alert(
+        'Select Car Brand',
+        '',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          ...KOREAN_CAR_BRANDS.map(brand => ({
+            text: brand,
+            onPress: () => {
+              setSelectedBrand(brand);
+              if (errors.brand) {
+                setErrors(prev => ({ ...prev, brand: '' }));
+              }
+            }
+          }))
+        ]
+      );
     }
   };
 
@@ -181,29 +221,24 @@ export const CarRegistrationScreen: React.FC = () => {
             )}
           </View>
 
-          {/* Car Brand Picker */}
+          {/* Car Brand Selector */}
           <View style={carRegistrationStyles.inputContainer}>
             <Text style={carRegistrationStyles.label}>Car Brand</Text>
-            <View style={[
-              carRegistrationStyles.pickerContainer,
-              errors.brand && carRegistrationStyles.inputError
-            ]}>
-              <Picker
-                selectedValue={selectedBrand}
-                onValueChange={(itemValue) => {
-                  setSelectedBrand(itemValue);
-                  if (errors.brand) {
-                    setErrors(prev => ({ ...prev, brand: '' }));
-                  }
-                }}
-                style={carRegistrationStyles.picker}
-              >
-                <Picker.Item label="Select car brand..." value="" />
-                {KOREAN_CAR_BRANDS.map(brand => (
-                  <Picker.Item key={brand} label={brand} value={brand} />
-                ))}
-              </Picker>
-            </View>
+            <TouchableOpacity
+              style={[
+                carRegistrationStyles.brandSelector,
+                errors.brand && carRegistrationStyles.inputError
+              ]}
+              onPress={handleBrandSelection}
+            >
+              <Text style={[
+                carRegistrationStyles.brandSelectorText,
+                !selectedBrand && carRegistrationStyles.brandSelectorPlaceholder
+              ]}>
+                {selectedBrand || 'Select car brand...'}
+              </Text>
+              <Text style={carRegistrationStyles.brandSelectorArrow}>▼</Text>
+            </TouchableOpacity>
             {errors.brand && (
               <Text style={carRegistrationStyles.errorText}>{errors.brand}</Text>
             )}
