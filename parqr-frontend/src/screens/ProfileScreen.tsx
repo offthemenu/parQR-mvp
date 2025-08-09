@@ -8,6 +8,7 @@ import { UserInfoCard } from '../components/UserInfoCard';
 import { QRCodeDisplay } from '../components/QRCodeDisplay';
 import { ActionButton } from '../components/ActionButton';
 import { profileScreenStyles } from '../styles/profileScreenStyles';
+import { AuthService } from '../services/authService';
 
 type ProfileScreenRouteProp = RouteProp<RootStackParamList, 'Profile'>;
 type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Profile'>;
@@ -31,14 +32,23 @@ export const ProfileScreen: React.FC = () => {
       'Are you sure you want to sign out?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Sign Out', 
+        {
+          text: 'Sign Out',
           style: 'destructive',
-          onPress: () => {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'SignIn' }],
-            });
+          onPress: async () => {
+            try {
+              // Clear AsyncStorage
+              await AuthService.clearAuthData();
+
+              // Navigate to sign in screen
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'SignIn' }],
+              });
+            } catch (error) {
+              console.error('Sign out failed:', error);
+              Alert.alert('Error', 'Failed to sign out. Please try again.');
+            }
           }
         }
       ]
