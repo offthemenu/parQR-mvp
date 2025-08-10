@@ -75,7 +75,7 @@ export class UserService {
    */
   static async lookupUser(userCode: string): Promise<UserWithCarsResponse> {
     try {
-      const response = await apiClient.get(`/v01/user/lookup/${userCode}`);
+      const response = await apiClient.get(`/v01/user/lookup/${userCode.toUpperCase()}`);
       return response.data;
     } catch (error: any) {
       console.error('User lookup error:', error.response?.data || error.message);
