@@ -14,7 +14,7 @@ load_dotenv()  # ✅ Load from your .env file
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.db.base import Base
-from app.models import user, car, parking_session
+from app.models import user, car, parking_session, chat_message
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

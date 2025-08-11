@@ -7,7 +7,7 @@ class Car(Base):
     __tablename__ = 'cars'
 
     id = Column(Integer, primary_key=True, index=True)
-    owner_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    owner_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
     license_plate = Column(String(20), unique=True, nullable=False)
     car_brand = Column(String(50))
     car_model = Column(String(50))

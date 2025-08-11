@@ -7,7 +7,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "update-ip": "node -e \"const fs=require('fs');const os=require('os');const nets=os.networkInterfaces();const ip=Object.values(nets).flat().find(n=>n.family==='IPv4'&&!n.internal&&n.address.startsWith('192.168.')).address;const config=fs.readFileSync('src/config/development.local.ts','utf8');const updated=config.replace(/http:\\/\\/[\\d.]+:/,'http://'+ip+':');fs.writeFileSync('src/config/development.local.ts',updated);console.log('Updated IP to:',ip);\""
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.1.2",
