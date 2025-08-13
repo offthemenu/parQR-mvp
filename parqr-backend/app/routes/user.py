@@ -1,9 +1,11 @@
+from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.base import get_db
 from app.models.user import User
 from app.schemas.user_schema import UserRegisterRequest, UserResponse, UserPublicResponse, UserWithCarsResponse
 from app.dependencies.auth import get_current_user
+from app.services.qr_service import QRCodeService
 import secrets
 import string
 import hashlib
@@ -11,6 +13,9 @@ import uuid
 import logging
 import sys
 from pathlib import Path
+import os
+
+load_dotenv(override=True)
 
 # Add scripts directory to path for imports
 scripts_dir = Path(__file__).parent.parent.parent / "scripts"
@@ -87,14 +92,39 @@ def register_user(
     
     # Generate QR code ID 
     qr_code_id = generate_qr_code_id(user_code, phone_number_clean)
+
+    # Generate profile deep link URL
+    if os.getenv("DEV_MODE", "false").lower() == "true":
+        profile_deep_link = f"exp://192.168.1.39:19006/--/profile/{user_code}"
+    else:
+        # production deep link when ready. Placeholder for now.
+        profile_deep_link = f"https://parqr.app/profile/{user_code}"
     
     logger.info(f"Generated user_code: {user_code}, qr_code_id: {qr_code_id}")
+
+    # Generate QR code image for physical card before saving user
+    try:
+        qr_image_path = QRCodeService.generate_profile_qr_image(
+            user_code=user_code,
+            qr_code_id=qr_code_id,
+            profile_url=profile_deep_link,
+            display_name=user_code  # Using user_code as default display name
+        )
+        logger.info(f"Generated QR image: {qr_image_path}")
+    except Exception as e:
+        logger.error(f"Failed to generate QR image for {user_code}: {str(e)}")
+        # Set to None if QR generation fails - don't block user registration
+        qr_image_path = None
     
     new_user = User(
         phone_number=phone_number_clean,
         user_code=user_code,
         qr_code_id=qr_code_id,
-        signup_country_iso=user_data.signup_country_iso.upper()
+        signup_country_iso=user_data.signup_country_iso.upper(),
+        profile_deep_link=profile_deep_link,
+        profile_display_name=user_code,
+        profile_bio=None,
+        qr_image_path=qr_image_path
     )
     
     db.add(new_user)
