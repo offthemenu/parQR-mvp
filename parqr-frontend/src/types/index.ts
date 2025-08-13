@@ -15,6 +15,25 @@ export interface UserWithCarsResponse {
   created_at: string;
   signup_country_iso: string;
   cars: CarResponse[];
+  // Public profile fields (safe for public viewing)
+  profile_deep_link?: string;
+  profile_bio?: string;
+  profile_display_name?: string;
+  qr_image_path?: string;
+}
+
+export interface UserLookupResponse {
+  id: number;
+  phone_number: string;
+  user_code: string;
+  qr_code_id: string;
+  created_at: string;
+  cars: CarResponse[];
+  profile_deep_link?: string;
+  profile_bio?: string;
+  profile_display_name?: string;
+  qr_image_path?: string;
+  signup_country_iso: string;
 }
 
 // Car related types
@@ -58,6 +77,36 @@ export interface ParkingSession {
   latitude?: number;
 }
 
+// Chat Message Types
+export interface ChatMessageCreate {
+  recipient_user_code: string;
+  message_content: string;
+  message_type: 'text' | 'move_car_request';
+}
+
+export interface ChatMessageResponse {
+  id: number;
+  sender_user_code: string;
+  recipient_user_code: string;
+  message_content: string;
+  message_type: string;
+  is_read: boolean;
+  created_at: string;
+  read_at?: string;
+}
+
+export interface ChatConversationResponse {
+  participant_user_code: string;
+  participant_display_name?: string;
+  last_message?: ChatMessageResponse;
+  unread_count: number;
+  last_activity: string;
+}
+
+export interface MarkAsReadRequest {
+  message_ids: number[];
+}
+
 // API Request/Response types
 export interface RegisterUserRequest {
   phone_number: string; // Raw format: 010XXXXXXXX
@@ -95,14 +144,26 @@ export type RootStackParamList = {
   SignIn: undefined;
   Register: undefined;
   CarRegistration: {
-    user: UserWithCarsResponse;
+    user: UserLookupResponse;
   };
   Home: {
-    user: RegisterUserResponse | UserWithCarsResponse;
+    user: UserLookupResponse | RegisterUserResponse;
   };
   Profile: {
-    user: RegisterUserResponse | UserWithCarsResponse;
+    user: UserLookupResponse | RegisterUserResponse;
   };
+  QRScanner: undefined; 
+  PublicProfile: { 
+    userCode: string;
+    userData: UserWithCarsResponse; // Privacy-safe type (no phone_number)
+    isWebView?: boolean;
+  };
+  Chat: { 
+    recipientUserCode: string;
+    recipientDisplayName: string;
+    sendMoveCarRequest?: boolean;
+  };
+  ChatList: undefined; 
 };
 
 // Phone number formatting types
@@ -156,3 +217,4 @@ export const KOREAN_CAR_BRANDS = [
 
 // License Plate Validation
 export const KOREAN_LICENSE_PLATE_REGEX = /^\d{2,3}[가-힣]\d{4}$/;
+export const MOVE_CAR_REQUEST_MESSAGE = "A verified user has requested you to move your car!"
