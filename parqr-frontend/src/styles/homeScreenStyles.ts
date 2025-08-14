@@ -3,71 +3,81 @@ import { StyleSheet } from 'react-native';
 export const homeScreenStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
   },
   header: {
     backgroundColor: '#007AFF',
-    padding: 20,
-    paddingTop: 60,
-    paddingBottom: 30,
+    paddingTop: 10,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '600',
     color: 'white',
-    marginBottom: 5,
+    flex: 1,
   },
-  userCodeText: {
-    fontSize: 16,
-    color: 'white',
-    opacity: 0.9,
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 10,
   },
-  section: {
-    backgroundColor: 'white',
-    margin: 15,
-    borderRadius: 10,
+  headerButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerButtonText: {
+    fontSize: 18,
+  },
+  qrSection: {
+    alignItems: 'center',
     padding: 20,
+    backgroundColor: '#f8f9fa',
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: '#333',
     marginBottom: 15,
   },
-  qrSection: {
+  qrDescription: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 10,
+    paddingHorizontal: 20,
+  },
+  actionsSection: {
+    padding: 20,
+  },
+  carsSection: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  carCard: {
     backgroundColor: '#f8f9fa',
     padding: 15,
     borderRadius: 8,
-    alignItems: 'center',
-  },
-  qrText: {
-    fontSize: 14,
-    color: '#666',
     marginBottom: 10,
   },
-  viewQrButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 5,
-  },
-  viewQrButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  emptyStateText: {
+  carInfo: {
     fontSize: 16,
-    color: '#999',
-    marginBottom: 5,
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 4,
   },
-  emptyStateSubtext: {
+  licensePlate: {
     fontSize: 14,
-    color: '#ccc',
-    textAlign: 'center',
+    color: '#666',
+    fontFamily: 'Courier',
   },
 });

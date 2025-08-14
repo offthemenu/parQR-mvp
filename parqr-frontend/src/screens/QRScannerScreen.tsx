@@ -181,44 +181,45 @@ export const QRScannerScreen: React.FC = () => {
         barcodeScannerSettings={{
           barcodeTypes: ['qr'],
         }}
-      >
-        <View style={qrScannerStyles.overlay}>
-          <View style={qrScannerStyles.topOverlay}>
-            <Text style={qrScannerStyles.instructions}>
-              Scan a parQR code to view user profile
-            </Text>
-          </View>
+      />
+      
+      {/* Overlay positioned absolutely on top of camera */}
+      <View style={qrScannerStyles.overlay}>
+        <View style={qrScannerStyles.topOverlay}>
+          <Text style={qrScannerStyles.instructions}>
+            Scan a parQR code to view user profile
+          </Text>
+        </View>
+        
+        <View style={qrScannerStyles.scanArea}>
+          <View style={qrScannerStyles.scanFrame} />
+        </View>
+        
+        <View style={qrScannerStyles.bottomOverlay}>
+          <TouchableOpacity 
+            style={qrScannerStyles.cancelButton}
+            onPress={() => navigation.goBack()}
+            disabled={isLoading}
+          >
+            <Text style={qrScannerStyles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
           
-          <View style={qrScannerStyles.scanArea}>
-            <View style={qrScannerStyles.scanFrame} />
-          </View>
-          
-          <View style={qrScannerStyles.bottomOverlay}>
-            <TouchableOpacity 
-              style={qrScannerStyles.cancelButton}
-              onPress={() => navigation.goBack()}
+          {scanned && (
+            <TouchableOpacity
+              style={qrScannerStyles.scanAgainButton}
+              onPress={() => {
+                setScanned(false);
+                setIsLoading(false);
+              }}
               disabled={isLoading}
             >
-              <Text style={qrScannerStyles.cancelButtonText}>Cancel</Text>
+              <Text style={qrScannerStyles.scanAgainButtonText}>
+                {isLoading ? 'Loading...' : 'Scan Again'}
+              </Text>
             </TouchableOpacity>
-            
-            {scanned && (
-              <TouchableOpacity
-                style={qrScannerStyles.scanAgainButton}
-                onPress={() => {
-                  setScanned(false);
-                  setIsLoading(false);
-                }}
-                disabled={isLoading}
-              >
-                <Text style={qrScannerStyles.scanAgainButtonText}>
-                  {isLoading ? 'Loading...' : 'Scan Again'}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
+          )}
         </View>
-      </CameraView>
+      </View>
     </View>
   );
 };

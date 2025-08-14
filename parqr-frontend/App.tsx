@@ -7,6 +7,10 @@ import { RegisterScreen } from './src/screens/RegisterScreen';
 import { CarRegistrationScreen } from './src/screens/CarRegistrationScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { ProfileScreen } from './src/screens/ProfileScreen';
+import { QRScannerScreen } from './src/screens/QRScannerScreen';
+import { PublicProfileScreen } from './src/screens/PublicProfileScreen';
+// import { ChatScreen } from './src/screens/ChatScreen';         // To be implemented
+// import { ChatListScreen } from './src/screens/ChatListScreen'; // To be implemented
 import { RootStackParamList } from './src/types';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -35,7 +39,7 @@ export default function App() {
           name="SignIn" 
           component={SignInScreen}
           options={{ 
-            title: 'Welcome',
+            title: 'Sign In',
             headerShown: false 
           }}
         />
@@ -43,8 +47,8 @@ export default function App() {
           name="Register" 
           component={RegisterScreen}
           options={{ 
-            title: 'parQR Registration',
-            headerBackTitle: ' '
+            title: 'Create Account',
+            headerBackTitle: 'Back'
           }}
         />
         <Stack.Screen 
@@ -52,8 +56,8 @@ export default function App() {
           component={CarRegistrationScreen}
           options={{ 
             title: 'Add Your Car',
-            headerLeft: () => null, // Remove back button
-            gestureEnabled: false // Disable swipe back
+            headerLeft: () => null,
+            gestureEnabled: false
           }}
         />
         <Stack.Screen 
@@ -61,8 +65,8 @@ export default function App() {
           component={HomeScreen}
           options={{ 
             title: 'parQR',
-            headerLeft: () => null, // Remove back button
-            gestureEnabled: false // Disable swipe back
+            headerLeft: () => null,
+            gestureEnabled: false
           }}
         />
         <Stack.Screen 
@@ -72,6 +76,39 @@ export default function App() {
             title: 'Profile'
           }}
         />
+        <Stack.Screen 
+          name="QRScanner" 
+          component={QRScannerScreen}
+          options={{ 
+            title: 'Scan QR Code',
+            headerStyle: {
+              backgroundColor: 'black',
+            }
+          }}
+        />
+        <Stack.Screen 
+          name="PublicProfile" 
+          component={PublicProfileScreen}
+          options={{ 
+            title: 'User Profile'
+          }}
+        />
+        {/* Chat screens will be implemented in next sprint
+        <Stack.Screen 
+          name="Chat" 
+          component={ChatScreen}
+          options={({ route }) => ({ 
+            title: route.params.recipientDisplayName
+          })}
+        />
+        <Stack.Screen 
+          name="ChatList" 
+          component={ChatListScreen}
+          options={{ 
+            title: 'Messages'
+          }}
+        />
+        */}
       </Stack.Navigator>
     </NavigationContainer>
   );
