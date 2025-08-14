@@ -9,8 +9,8 @@ import { HomeScreen } from './src/screens/HomeScreen';
 import { ProfileScreen } from './src/screens/ProfileScreen';
 import { QRScannerScreen } from './src/screens/QRScannerScreen';
 import { PublicProfileScreen } from './src/screens/PublicProfileScreen';
-// import { ChatScreen } from './src/screens/ChatScreen';         // To be implemented
-// import { ChatListScreen } from './src/screens/ChatListScreen'; // To be implemented
+import { ChatScreen } from './src/screens/ChatScreen';         
+import { ChatListScreen } from './src/screens/ChatListScreen'; 
 import { RootStackParamList } from './src/types';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -93,7 +93,6 @@ export default function App() {
             title: 'User Profile'
           }}
         />
-        {/* Chat screens will be implemented in next sprint
         <Stack.Screen 
           name="Chat" 
           component={ChatScreen}
@@ -108,7 +107,7 @@ export default function App() {
             title: 'Messages'
           }}
         />
-        */}
+       
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -25,11 +25,7 @@ export const HomeScreen: React.FC = () => {
   };
 
   const handleViewChats = () => {
-    Alert.alert(
-      'Coming Soon',
-      'Chat functionality will be implemented in the next sprint.',
-      [{ text: 'OK' }]
-    );
+    navigation.navigate('ChatList');
   };
 
   return (

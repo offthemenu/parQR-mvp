@@ -2,11 +2,12 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware 
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
-
+from pathlib import Path
 from app.db.session import engine
 from app.db.base import Base
-from app.routes import car, health_check, parking, user, signup
+from app.routes import car, health_check, parking, user, signup, chat
 
 load_dotenv(override=True)
 
@@ -42,6 +43,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Servicing QR code images
+qr_image_path = Path(__file__).parent / "qr_images"
+qr_image_path.mkdir(exist_ok=True)
+app.mount("/qr_images", StaticFiles(directory=str(qr_image_path)), name="qr_images")
+
 Base.metadata.create_all(bind=engine)
 
 app.include_router(health_check.router, prefix= "/api")
@@ -49,6 +55,7 @@ app.include_router(user.router, prefix= "/api")
 app.include_router(car.router, prefix= "/api")
 app.include_router(parking.router, prefix= "/api")
 app.include_router(signup.router, prefix = "/api")
+app.include_router(chat.router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn
