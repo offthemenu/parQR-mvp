@@ -12,6 +12,7 @@ class UserResponse(BaseModel):
     qr_code_id: Optional[str] = None
     created_at: datetime
     signup_country_iso: str
+    qr_image_path: Optional[str] = None
     # Note: phone_number deliberately excluded for privacy
     
     model_config = {"from_attributes": True}
@@ -32,6 +33,7 @@ class UserWithCarsResponse(BaseModel):
     qr_code_id: str
     created_at: datetime
     signup_country_iso: str
+    qr_image_path: Optional[str] = None
     cars: list[dict] = [] # populated with car data
 
     model_config = {"from_attributes": True}

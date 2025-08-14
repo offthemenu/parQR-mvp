@@ -40,7 +40,7 @@ class QRCodeService:
             qr.make(fit=True)
 
             # Create QR code image
-            qr_img = qr.make_image(fill_color = "black", back_color = "whilte")
+            qr_img = qr.make_image(fill_color="black", back_color="white")
 
             # Save with descriptive filename for design POC
             qr_dir = QRCodeService.get_qr_images_directory()
