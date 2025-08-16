@@ -20,16 +20,34 @@ app = FastAPI(
 )
 
 # Configure CORS middleware
-origins = [
-    "http://localhost:3000",      # React development server
-    "http://localhost:19006",     # Expo development server
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:19006",
-    "http://192.168.1.30:19006",  # Your specific IP for Expo
-    "http://192.168.1.30:8081",   # Metro bundler
-    "exp://192.168.1.30:8081",    # Expo scheme
-    "null",                       # For local HTML files
-]
+def get_cors_origins():
+    """Generate CORS origins dynamically based on environment"""
+    base_origins = [
+        "http://localhost:3000",      # React development server
+        "http://localhost:19006",     # Expo development server  
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:19006",
+        "null",                       # For local HTML files
+    ]
+    
+    # Add common development IPs
+    dev_ips = [
+        "192.168.1.30",   # Previous home wifi IP
+        "192.168.1.39",   # Current home wifi IP
+        "192.0.0.2",      # Phone hotspot IP
+    ]
+    
+    # Add development IPs with common ports
+    for ip in dev_ips:
+        base_origins.extend([
+            f"http://{ip}:19006",    # Expo development server
+            f"http://{ip}:8081",     # Metro bundler
+            f"exp://{ip}:8081",      # Expo scheme
+        ])
+    
+    return base_origins
+
+origins = get_cors_origins()
 
 # For development: Allow all origins (ONLY for development!)
 if os.getenv("DEV_MODE", "false").lower() == "true":

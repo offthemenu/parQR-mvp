@@ -4,6 +4,11 @@ import { AuthService } from '../services/authService';
 
 const API_BASE_URL = DEV_CONFIG.EXPO_PUBLIC_LOCAL_API_BASE_URL;
 
+// Log network configuration in development
+if (__DEV__ && DEV_CONFIG._logNetworkConfig) {
+  DEV_CONFIG._logNetworkConfig();
+}
+
 console.log('🌐 API Base URL:', API_BASE_URL); // Debug log
 
 export const apiClient = axios.create({
