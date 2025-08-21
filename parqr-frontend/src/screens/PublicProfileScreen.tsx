@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Alert, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -16,19 +16,19 @@ export const PublicProfileScreen: React.FC = () => {
   const { userCode, userData, isWebView = false } = route.params;
 
   const handleSendMessage = () => {
-    Alert.alert(
-      'Coming Soon',
-      'Chat functionality will be implemented in the next sprint.',
-      [{ text: 'OK' }]
-    );
+    navigation.navigate('Chat', {
+      recipientUserCode: userCode,
+      recipientDisplayName: userData.profile_display_name || userCode,
+      sendMoveCarRequest: false
+    });
   };
 
   const handleRequestCarMove = () => {
-    Alert.alert(
-      'Coming Soon', 
-      'Move car request functionality will be implemented in the next sprint.',
-      [{ text: 'OK' }]
-    );
+    navigation.navigate('Chat', {
+      recipientUserCode: userCode,
+      recipientDisplayName: userData.profile_display_name || userCode,
+      sendMoveCarRequest: true
+    });
   };
 
   const handleCloseProfile = () => {

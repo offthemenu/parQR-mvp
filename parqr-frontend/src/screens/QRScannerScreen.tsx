@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../types';
+import { RootStackParamList, UserWithCarsResponse } from '../types';
 import { UserService } from '../services/userService';
 import { qrScannerStyles } from '../styles/qrScannerStyles';
+import { UserActionModal } from '../components/UserActionModal';
+import { safeAlert } from '../utils/alertUtils';
 
 type QRScannerNavigationProp = StackNavigationProp<RootStackParamList, 'QRScanner'>;
 
@@ -14,6 +16,8 @@ export const QRScannerScreen: React.FC = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [foundUser, setFoundUser] = useState<UserWithCarsResponse | null>(null);
 
   const extractUserCodeFromQR = (data: string): string | null => {
     try {
@@ -52,7 +56,7 @@ export const QRScannerScreen: React.FC = () => {
       const userCode = extractUserCodeFromQR(data);
       
       if (!userCode) {
-        Alert.alert(
+        safeAlert(
           'Invalid QR Code',
           'This QR code is not a valid parQR user code.',
           [
@@ -76,48 +80,9 @@ export const QRScannerScreen: React.FC = () => {
       // Look up user by user code
       const userData = await UserService.lookupUser(userCode);
       
-      Alert.alert(
-        'User Found!',
-        `Found ${userData.user_code}. What would you like to do?`,
-        [
-          {
-            text: 'View Profile',
-            onPress: () => {
-              navigation.navigate('PublicProfile', { 
-                userCode: userData.user_code,
-                userData: userData 
-              });
-            }
-          },
-          {
-            text: 'Send Message',
-            onPress: () => {
-              navigation.navigate('Chat', { 
-                recipientUserCode: userData.user_code,
-                recipientDisplayName: userData.user_code
-              });
-            }
-          },
-          {
-            text: 'Request Car Move',
-            onPress: () => {
-              navigation.navigate('Chat', {
-                recipientUserCode: userData.user_code,
-                recipientDisplayName: userData.user_code,
-                sendMoveCarRequest: true
-              });
-            }
-          },
-          {
-            text: 'Scan Again',
-            style: 'cancel',
-            onPress: () => {
-              setScanned(false);
-              setIsLoading(false);
-            }
-          }
-        ]
-      );
+      // Show modal instead of alert
+      setFoundUser(userData);
+      setShowModal(true);
 
     } catch (error: any) {
       console.error('QR scan error:', error);
@@ -127,7 +92,7 @@ export const QRScannerScreen: React.FC = () => {
         errorMessage = 'This user could not be found. They may not be registered with parQR.';
       }
 
-      Alert.alert(
+      safeAlert(
         'User Not Found',
         errorMessage,
         [
@@ -147,6 +112,49 @@ export const QRScannerScreen: React.FC = () => {
       );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const resetScanner = () => {
+    setScanned(false);
+    setIsLoading(false);
+    setShowModal(false);
+    setFoundUser(null);
+  };
+
+  const handleModalClose = () => {
+    setShowModal(false);
+    setFoundUser(null);
+  };
+
+  const handleViewProfile = () => {
+    if (foundUser) {
+      setShowModal(false);
+      navigation.navigate('PublicProfile', { 
+        userCode: foundUser.user_code,
+        userData: foundUser 
+      });
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (foundUser) {
+      setShowModal(false);
+      navigation.navigate('Chat', { 
+        recipientUserCode: foundUser.user_code,
+        recipientDisplayName: foundUser.profile_display_name || foundUser.user_code
+      });
+    }
+  };
+
+  const handleRequestCarMove = () => {
+    if (foundUser) {
+      setShowModal(false);
+      navigation.navigate('Chat', {
+        recipientUserCode: foundUser.user_code,
+        recipientDisplayName: foundUser.profile_display_name || foundUser.user_code,
+        sendMoveCarRequest: true
+      });
     }
   };
 
@@ -207,10 +215,7 @@ export const QRScannerScreen: React.FC = () => {
           {scanned && (
             <TouchableOpacity
               style={qrScannerStyles.scanAgainButton}
-              onPress={() => {
-                setScanned(false);
-                setIsLoading(false);
-              }}
+              onPress={resetScanner}
               disabled={isLoading}
             >
               <Text style={qrScannerStyles.scanAgainButtonText}>
@@ -220,6 +225,19 @@ export const QRScannerScreen: React.FC = () => {
           )}
         </View>
       </View>
+
+      {/* User Action Modal */}
+      {foundUser && (
+        <UserActionModal
+          visible={showModal}
+          userCode={foundUser.user_code}
+          onClose={handleModalClose}
+          onViewProfile={handleViewProfile}
+          onSendMessage={handleSendMessage}
+          onRequestCarMove={handleRequestCarMove}
+          onScanAgain={resetScanner}
+        />
+      )}
     </View>
   );
 };

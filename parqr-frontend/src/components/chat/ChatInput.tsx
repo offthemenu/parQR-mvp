@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Text, Alert } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text } from 'react-native';
 import { chatInputStyles } from '../../styles/chat/chatInputStyles';
+import { safeAlert } from '../../utils/alertUtils';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => Promise<void>;
@@ -20,12 +21,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     const trimmedMessage = message.trim();
     
     if (!trimmedMessage) {
-      Alert.alert('Empty Message', 'Please enter a message before sending.');
+      safeAlert('Empty Message', 'Please enter a message before sending.');
       return;
     }
 
     if (trimmedMessage.length > MAX_MESSAGE_LENGTH) {
-      Alert.alert(
+      safeAlert(
         'Message Too Long', 
         `Please keep messages under ${MAX_MESSAGE_LENGTH} characters.`
       );
@@ -38,7 +39,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       await onSendMessage(trimmedMessage);
       setMessage(''); // Clear input after successful send
     } catch (error) {
-      Alert.alert('Send Failed', 'Please try sending your message again.');
+      safeAlert('Send Failed', 'Please try sending your message again.');
     } finally {
       setIsSending(false);
     }
