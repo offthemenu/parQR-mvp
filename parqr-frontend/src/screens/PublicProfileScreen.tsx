@@ -1,11 +1,11 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types';
-import { ActionButton } from '../components/ActionButton';
 import { publicProfileStyles } from '../styles/publicProfileStyles';
+import { ChatService } from '../services/chatService';
 
 type PublicProfileScreenRouteProp = RouteProp<RootStackParamList, 'PublicProfile'>;
 type PublicProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'PublicProfile'>;
@@ -14,21 +14,54 @@ export const PublicProfileScreen: React.FC = () => {
   const route = useRoute<PublicProfileScreenRouteProp>();
   const navigation = useNavigation<PublicProfileScreenNavigationProp>();
   const { userCode, userData, isWebView = false } = route.params;
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendMessage = () => {
-    navigation.navigate('Chat', {
-      recipientUserCode: userCode,
-      recipientDisplayName: userData.profile_display_name || userCode,
-      sendMoveCarRequest: false
-    });
+  const handleSendChat = () => {
+    setIsLoading(true);
+
+    try {
+      navigation.navigate('Chat', {
+        recipientUserCode: userCode,
+        recipientDisplayName: userData.profile_display_name || userCode
+      });
+    } catch (error) {
+      Alert.alert('Error', 'Unable to open chat. Please try again.');
+      console.error('Chat navigation error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleRequestCarMove = () => {
-    navigation.navigate('Chat', {
-      recipientUserCode: userCode,
-      recipientDisplayName: userData.profile_display_name || userCode,
-      sendMoveCarRequest: true
-    });
+  const handleRequestMovecar = async () => {
+    setIsLoading(true);
+
+    try {
+      // Send move car request through chat system
+      await ChatService.sendMoveCarRequest(userCode);
+
+      Alert.alert(
+        'Request Sent',
+        'Your request to move the car has been sent.',
+        [
+          {
+            text: 'Open Chat',
+            onPress: () => {
+              navigation.navigate('Chat', {
+                recipientUserCode: userCode,
+                recipientDisplayName: userData.profile_display_name || userCode,
+                sendMoveCarRequest: false // Since we already sent it
+              });
+            }
+          },
+          { text: 'OK' }
+        ]
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Unable to send request. Please check your connection.');
+      console.error('Move car request error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCloseProfile = () => {
@@ -42,7 +75,7 @@ export const PublicProfileScreen: React.FC = () => {
     <SafeAreaView style={publicProfileStyles.container}>
       {/* Close Button (In-App Only) */}
       {!isWebView && (
-        <TouchableOpacity 
+        <TouchableOpacity
           style={publicProfileStyles.closeButton}
           onPress={handleCloseProfile}
         >
@@ -70,22 +103,39 @@ export const PublicProfileScreen: React.FC = () => {
         )}
 
         {/* Action Buttons */}
-        <View style={publicProfileStyles.buttonSection}>
-          <ActionButton
-            title="🚗 Request to Move Car"
-            onPress={handleRequestCarMove}
-            variant="primary"
-          />
-          
-          {/* Send Chat Button (In-App Only) */}
-          {!isWebView && (
-            <ActionButton
-              title="💬 Send Chat"
-              onPress={handleSendMessage}
-              variant="secondary"
-            />
-          )}
-        </View>
+        <TouchableOpacity
+          style={[
+            publicProfileStyles.actionButton,
+            isLoading && publicProfileStyles.actionButtonDisabled
+          ]}
+          onPress={handleRequestMovecar}
+          disabled={isLoading}
+        >
+          <Text style={[
+            publicProfileStyles.actionButtonText,
+            isLoading && publicProfileStyles.actionButtonTextDisabled
+          ]}>
+            {isLoading ? 'Sending...' : '🚗 Request to Move Car'}
+          </Text>
+        </TouchableOpacity>
+
+        {!isWebView && (
+          <TouchableOpacity
+            style={[
+              publicProfileStyles.chatButton,
+              isLoading && publicProfileStyles.actionButtonDisabled
+            ]}
+            onPress={handleSendChat}
+            disabled={isLoading}
+          >
+            <Text style={[
+              publicProfileStyles.chatButtonText,
+              isLoading && publicProfileStyles.actionButtonTextDisabled
+            ]}>
+              {isLoading ? 'Opening...' : '💬 Send Chat'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   );

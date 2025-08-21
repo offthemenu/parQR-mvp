@@ -39,11 +39,8 @@ export const qrScannerStyles = StyleSheet.create({
   scanFrame: {
     width: scanAreaSize,
     height: scanAreaSize,
-    borderWidth: 2,
-    borderColor: '#007AFF',
     backgroundColor: 'transparent',
     alignSelf: 'center',
-    borderRadius: 20,
   },
   bottomOverlay: {
     flex: 1,

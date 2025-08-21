@@ -59,4 +59,52 @@ export const publicProfileStyles = StyleSheet.create({
     width: '100%',
     gap: 15,
   },
+  actionButton: {
+    backgroundColor: '#FF6B6B',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  actionButtonDisabled: {
+    backgroundColor: '#E5E5EA',
+    opacity: 0.6,
+  },
+  actionButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  actionButtonTextDisabled: {
+    color: '#999',
+    opacity: 0.7,
+  },
+  chatButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  chatButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
+  },
 });
