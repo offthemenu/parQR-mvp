@@ -29,12 +29,12 @@ class QRCodeService:
         """
 
         try:
-            # Create QR code
+            # Create QR code with minimal, clean settings to match frontend display
             qr = qrcode.QRCode(
                 version=1,
-                error_correction=qrcode.constants.ERROR_CORRECT_H,
-                box_size=10,
-                border=4
+                error_correction=qrcode.constants.ERROR_CORRECT_L,  # Low error correction for simpler pattern
+                box_size=6,  # Smaller box size for cleaner look
+                border=2     # Minimal border
             )
             qr.add_data(profile_url)
             qr.make(fit=True)
