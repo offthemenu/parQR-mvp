@@ -7,14 +7,21 @@ import { RootStackParamList } from '../types';
 import { QRCodeDisplay } from '../components/QRCodeDisplay';
 import { ActionButton } from '../components/ActionButton';
 import { homeScreenStyles } from '../styles/homeScreenStyles';
+import { useChatNotifications } from '../hooks/useChatNotifications';
+import { NotificationBadge } from '../components/home/NotificationBadge';
 
 type HomeScreenRouteProp = RouteProp<RootStackParamList, 'Home'>;
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 export const HomeScreen: React.FC = () => {
   const route = useRoute<HomeScreenRouteProp>();
-  const navigation = useNavigation<HomeScreenNavigationProp>();
   const { user } = route.params;
+  const { totalUnreadCount } = useChatNotifications({
+    currentUserCode: user.user_code,
+    enabled: true,
+    pollInterval: 30000
+  })
+  const navigation = useNavigation<HomeScreenNavigationProp>();
 
   const handleQRScan = () => {
     navigation.navigate('QRScanner');
@@ -44,6 +51,7 @@ export const HomeScreen: React.FC = () => {
               onPress={handleViewChats}
             >
               <Text style={homeScreenStyles.headerButtonText}>💬</Text>
+              <NotificationBadge count={totalUnreadCount} />
             </TouchableOpacity>
             
             <TouchableOpacity 

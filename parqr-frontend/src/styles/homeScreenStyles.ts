@@ -33,6 +33,7 @@ export const homeScreenStyles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative', // for badge positioning
   },
   headerButtonText: {
     fontSize: 18,
