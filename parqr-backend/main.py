@@ -32,8 +32,7 @@ def get_cors_origins():
     
     # Add common development IPs
     dev_ips = [
-        "192.168.1.30",   # Previous home wifi IP
-        "192.168.1.39",   # Current home wifi IP
+        "192.168.1.39",   # Current work wifi IP
         "192.0.0.2",      # Phone hotspot IP
     ]
     

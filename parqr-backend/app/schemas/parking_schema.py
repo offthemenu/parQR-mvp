@@ -3,6 +3,7 @@ from typing import Optional
 from datetime import datetime
 
 class ParkingSessionCreate(BaseModel):
+    car_id: int
     note_location: Optional[str] = None
     longitude: Optional[float] = None
     latitude: Optional[float] = None

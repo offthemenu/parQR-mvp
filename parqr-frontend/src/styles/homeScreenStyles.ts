@@ -81,4 +81,8 @@ export const homeScreenStyles = StyleSheet.create({
     color: '#666',
     fontFamily: 'Courier',
   },
+  parkingSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
 });

@@ -72,9 +72,16 @@ export interface ParkingSession {
   car_id: number;
   start_time: string;
   end_time?: string;
-  note_location?: string;
-  longitude?: number;
   latitude?: number;
+  longitude?: number;
+  note_location?: string;
+}
+
+export interface StartParkingRequest {
+  car_id: number;
+  latitude?: number;
+  longitude?: number;
+  note_location?: string;
 }
 
 // Chat Message Types
