@@ -89,13 +89,23 @@ export const ChatScreen: React.FC = () => {
               msg => msg.sender_user_code === recipientUserCode && !msg.is_read
             );
             
+            console.log(`🔍 Chat Screen Debug - Total messages: ${messages.length}`);
+            console.log(`🔍 Chat Screen Debug - Unread messages found: ${unreadMessages.length}`);
+            console.log(`🔍 Chat Screen Debug - Recipient user code: ${recipientUserCode}`);
+            console.log(`🔍 Chat Screen Debug - Current user code: ${currentUserCode}`);
+            
             if (unreadMessages.length > 0) {
               const messageIds = unreadMessages.map(msg => msg.id);
-              await ChatService.markMessagesAsRead(messageIds);
+              console.log(`🔍 Chat Screen Debug - Marking messages as read: ${messageIds}`);
+              const result = await ChatService.markMessagesAsRead(messageIds);
+              console.log(`🔍 Chat Screen Debug - Mark as read result:`, result);
+              
+              // Refresh the messages to reflect read status
+              await refreshMessages();
             }
           } catch (error) {
             // Silent fail for read status
-            console.log('Failed to mark messages as read');
+            console.log('Failed to mark messages as read:', error);
           }
         };
         

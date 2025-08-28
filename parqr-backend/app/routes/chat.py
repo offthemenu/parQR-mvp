@@ -85,49 +85,70 @@ def get_conversations(
     """Get all conversations for current user"""
     logger.info(f"Fetching conversations for user {current_user.user_code}")
     
-    # Subquery to get latest message for each conversation
-    latest_messages = db.query(
-        ChatMessage.id,
-        func.row_number().over(
-            partition_by=func.least(ChatMessage.sender_id, ChatMessage.recipient_id),
-            order_by=desc(ChatMessage.created_at)
-        ).label('rn')
-    ).filter(
-        or_(ChatMessage.sender_id == current_user.id, ChatMessage.recipient_id == current_user.id)
-    ).subquery()
+    # Get all unique conversation participants
+    # Using a union to get both senders and recipients who have chatted with current user
+    participants_sent_to = db.query(ChatMessage.recipient_id.label('participant_id')).filter(
+        ChatMessage.sender_id == current_user.id
+    ).distinct()
     
-    # Get conversations with latest message info
-    conversations_query = db.query(ChatMessage, User).join(
-        latest_messages, ChatMessage.id == latest_messages.c.id
-    ).filter(latest_messages.c.rn == 1)
+    participants_received_from = db.query(ChatMessage.sender_id.label('participant_id')).filter(
+        ChatMessage.recipient_id == current_user.id
+    ).distinct()
+    
+    # Union the two queries to get all unique participants
+    all_participants = participants_sent_to.union(participants_received_from).all()
     
     conversations = []
-    for message, _ in conversations_query:
-        # Determine the other participant
-        other_user_id = message.recipient_id if message.sender_id == current_user.id else message.sender_id
-        other_user = db.query(User).filter(User.id == other_user_id).first()
+    processed_participants = set()
+    
+    for participant_tuple in all_participants:
+        participant_id = participant_tuple[0]
         
-        # Count unread messages in this conversation
+        # Skip if we've already processed this participant
+        if participant_id in processed_participants:
+            continue
+        processed_participants.add(participant_id)
+        
+        # Get the participant user info
+        other_user = db.query(User).filter(User.id == participant_id).first()
+        if not other_user:
+            continue
+            
+        # Get the latest message in this conversation
+        latest_message = db.query(ChatMessage).filter(
+            or_(
+                and_(ChatMessage.sender_id == current_user.id, ChatMessage.recipient_id == participant_id),
+                and_(ChatMessage.sender_id == participant_id, ChatMessage.recipient_id == current_user.id)
+            )
+        ).order_by(desc(ChatMessage.created_at)).first()
+        
+        if not latest_message:
+            continue
+            
+        # Debug: Log the latest message details
+        logger.info(f"Latest message for conversation with {other_user.user_code}: ID={latest_message.id}, created_at={latest_message.created_at}, content preview: {latest_message.message_content[:20]}...")
+            
+        # Count unread messages from this participant to current user
         unread_count = db.query(ChatMessage).filter(
             and_(
-                ChatMessage.sender_id == other_user_id,
+                ChatMessage.sender_id == participant_id,
                 ChatMessage.recipient_id == current_user.id,
                 ChatMessage.is_read == False
             )
         ).count()
         
         # Decrypt last message
-        decrypted_content = ChatMessage.simple_decrypt(message.message_content, message.encryption_key)
+        decrypted_content = ChatMessage.simple_decrypt(latest_message.message_content, latest_message.encryption_key)
         
         last_message = ChatMessageResponse(
-            id=message.id,
-            sender_user_code=message.sender.user_code,
-            recipient_user_code=message.recipient.user_code,
+            id=latest_message.id,
+            sender_user_code=latest_message.sender.user_code,
+            recipient_user_code=latest_message.recipient.user_code,
             message_content=decrypted_content,
-            message_type=message.message_type,
-            is_read=message.is_read,
-            created_at=message.created_at,
-            read_at=message.read_at
+            message_type=latest_message.message_type,
+            is_read=latest_message.is_read,
+            created_at=latest_message.created_at,
+            read_at=latest_message.read_at
         )
         
         conversation = ChatConversationResponse(
@@ -135,7 +156,7 @@ def get_conversations(
             participant_display_name=other_user.profile_display_name or other_user.user_code,
             last_message=last_message,
             unread_count=unread_count,
-            last_activity=message.created_at
+            last_activity=latest_message.created_at
         )
         conversations.append(conversation)
     

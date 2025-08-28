@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types';
@@ -19,7 +19,7 @@ type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 export const HomeScreen: React.FC = () => {
   const route = useRoute<HomeScreenRouteProp>();
   const { user } = route.params;
-  const { totalUnreadCount } = useChatNotifications({
+  const { totalUnreadCount, refreshUnreadCount } = useChatNotifications({
     currentUserCode: user.user_code,
     enabled: true,
     pollInterval: 30000
@@ -59,6 +59,14 @@ export const HomeScreen: React.FC = () => {
 
     fetchActiveSession();
   }, []);
+
+  // Refresh notifications when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('🏠 HomeScreen focused - refreshing notifications');
+      refreshUnreadCount();
+    }, [refreshUnreadCount])
+  );
 
   // parking session handlers
   const handleStartParking = async () => {

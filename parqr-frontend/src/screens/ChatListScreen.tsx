@@ -70,14 +70,27 @@ export const ChatListScreen: React.FC = () => {
       const conversations = await ChatService.getConversations();
       
       // Debug: Log the raw API response
-      console.log('Raw conversations from API:', conversations);
+      console.log('📋 Chat List Debug - Raw conversations from API:', conversations);
+      
+      // Debug: Log each conversation's last message details
+      conversations?.forEach((conv, index) => {
+        console.log(`📋 Conversation ${index + 1} - User: ${conv.participant_user_code}`);
+        if (conv.last_message) {
+          console.log(`📋   Last message ID: ${conv.last_message.id}`);
+          console.log(`📋   Last message content: "${conv.last_message.message_content}"`);
+          console.log(`📋   Last message created_at: ${conv.last_message.created_at}`);
+          console.log(`📋   Last message sender: ${conv.last_message.sender_user_code}`);
+        } else {
+          console.log(`📋   No last message found for this conversation`);
+        }
+      });
       
       // Remove duplicates based on participant_user_code
       const uniqueConversations = conversations ? conversations.filter((conv, index, self) => 
         index === self.findIndex(c => c.participant_user_code === conv.participant_user_code)
       ) : [];
       
-      console.log('Unique conversations after filtering:', uniqueConversations);
+      console.log('📋 Chat List Debug - Unique conversations after filtering:', uniqueConversations);
       
       setConversations(uniqueConversations);
       setError(null);

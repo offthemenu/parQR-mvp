@@ -30,6 +30,13 @@ export const useChatNotifications = ({
                 (total, conversation) => total + (conversation.unread_count || 0),
                 0
             );
+            
+            console.log(`🔔 Notification Debug - Found ${conversations.length} conversations`);
+            conversations.forEach((conv, index) => {
+                console.log(`🔔 Conversation ${index + 1}: ${conv.participant_user_code} - Unread: ${conv.unread_count}`);
+            });
+            console.log(`🔔 Notification Debug - Total unread count: ${unreadCount}`);
+            
             setTotalUnreadCount(unreadCount);
         } catch (error) {
             console.error('Error fetching unread count:', error);
