@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { messageBubbleStyles } from "../../styles/chat/messageBubbleStyles";
+import { formatLocalTime } from "../../utils/timeUtils";
 
 interface MessageBubbleProps {
     message: {
@@ -20,14 +21,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     senderDisplayName
 }) => {
     const isSentMessage = message.sender_user_code === currentUserCode;
-    const formatTime = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-        });
-    };
+    // Using the utility function for consistent time formatting
 
     return (
         <View style={[
@@ -52,7 +46,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                         messageBubbleStyles.timestamp,
                         isSentMessage ? messageBubbleStyles.sentTimestamp : messageBubbleStyles.receivedTimestamp
                     ]}>
-                        {formatTime(message.created_at)}
+                        {formatLocalTime(message.created_at)}
                     </Text>
                     {isSentMessage && (
                         <Text style={messageBubbleStyles.readStatus}>

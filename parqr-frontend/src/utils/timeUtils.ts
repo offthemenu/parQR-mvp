@@ -71,3 +71,84 @@ export const formatTimeForCountry = (timeUTC: string, countryISO: string): strin
     hour12: countryISO === 'US' // US uses 12-hour format, most others use 24-hour
   });
 };
+
+// Cache the timezone to avoid repeated detection
+let cachedTimezone: string | null = null;
+
+/**
+ * Get the device's timezone (cached)
+ */
+export const getDeviceTimezone = (): string => {
+  if (cachedTimezone) {
+    return cachedTimezone;
+  }
+  
+  try {
+    cachedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    console.log(`🌍 Device timezone detected: ${cachedTimezone}`);
+    return cachedTimezone;
+  } catch (error) {
+    console.warn('Could not detect device timezone, falling back to UTC');
+    cachedTimezone = 'UTC';
+    return cachedTimezone;
+  }
+};
+
+/**
+ * Format timestamp for display using device's actual timezone
+ */
+export const formatLocalTime = (timeUTC: string): string => {
+  // Ensure the timestamp is treated as UTC by adding 'Z' if missing
+  const utcTimestamp = timeUTC.endsWith('Z') ? timeUTC : timeUTC + 'Z';
+  const date = new Date(utcTimestamp);
+  const deviceTimezone = getDeviceTimezone();
+  
+  // Debug: Log the conversion
+  const utcTime = date.toLocaleTimeString('en-US', { timeZone: 'UTC', hour12: false });
+  const localTime = date.toLocaleTimeString('en-US', { timeZone: deviceTimezone, hour12: false });
+  console.log(`🕐 Time conversion: ${timeUTC} → ${utcTimestamp} (${utcTime} UTC) → ${localTime} ${deviceTimezone}`);
+  
+  return date.toLocaleTimeString([], {
+    timeZone: deviceTimezone,
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+};
+
+/**
+ * Format timestamp for chat list display (shows time for today, date for older)
+ */
+export const formatChatListTime = (timeUTC: string): string => {
+  // Ensure the timestamp is treated as UTC by adding 'Z' if missing
+  const utcTimestamp = timeUTC.endsWith('Z') ? timeUTC : timeUTC + 'Z';
+  const date = new Date(utcTimestamp);
+  const deviceTimezone = getDeviceTimezone();
+  const now = new Date();
+  
+  // Convert both dates to the device timezone for comparison
+  const localDate = new Date(date.toLocaleString('en-US', { timeZone: deviceTimezone }));
+  const localNow = new Date(now.toLocaleString('en-US', { timeZone: deviceTimezone }));
+  
+  const diffInHours = (localNow.getTime() - localDate.getTime()) / (1000 * 60 * 60);
+
+  if (diffInHours < 24) {
+    return date.toLocaleTimeString([], {
+      timeZone: deviceTimezone,
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  } else if (diffInHours < 168) { // Less than 7 days
+    return date.toLocaleDateString([], { 
+      timeZone: deviceTimezone,
+      weekday: 'short' 
+    });
+  } else {
+    return date.toLocaleDateString([], {
+      timeZone: deviceTimezone,
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+};

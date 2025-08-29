@@ -114,19 +114,32 @@ def get_conversations(
         if not other_user:
             continue
             
-        # Get the latest message in this conversation
+        # Get the latest message in this conversation - order by ID desc as primary since timestamps are not precise enough
         latest_message = db.query(ChatMessage).filter(
             or_(
                 and_(ChatMessage.sender_id == current_user.id, ChatMessage.recipient_id == participant_id),
                 and_(ChatMessage.sender_id == participant_id, ChatMessage.recipient_id == current_user.id)
             )
-        ).order_by(desc(ChatMessage.created_at)).first()
+        ).order_by(desc(ChatMessage.id)).first()
         
         if not latest_message:
             continue
             
-        # Debug: Log the latest message details
-        logger.info(f"Latest message for conversation with {other_user.user_code}: ID={latest_message.id}, created_at={latest_message.created_at}, content preview: {latest_message.message_content[:20]}...")
+        # Debug: Show all messages in this conversation for comparison
+        all_messages = db.query(ChatMessage).filter(
+            or_(
+                and_(ChatMessage.sender_id == current_user.id, ChatMessage.recipient_id == participant_id),
+                and_(ChatMessage.sender_id == participant_id, ChatMessage.recipient_id == current_user.id)
+            )
+        ).order_by(desc(ChatMessage.id)).all()
+        
+        logger.info(f"=== ALL MESSAGES for conversation with {other_user.user_code} ===")
+        for i, msg in enumerate(all_messages[:5]):  # Show top 5 most recent
+            sender_code = msg.sender.user_code if msg.sender else "Unknown"
+            logger.info(f"Message {i+1}: ID={msg.id}, created_at={msg.created_at}, sender={sender_code}, content: {msg.message_content[:30]}...")
+        
+        # Debug: Log the selected latest message
+        logger.info(f"SELECTED as latest: ID={latest_message.id}, created_at={latest_message.created_at}, content preview: {latest_message.message_content[:20]}...")
             
         # Count unread messages from this participant to current user
         unread_count = db.query(ChatMessage).filter(

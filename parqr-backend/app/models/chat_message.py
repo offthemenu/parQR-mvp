@@ -21,7 +21,7 @@ class ChatMessage(Base):
 
     # Metadata
     is_read = Column(Boolean, default=False, nullable=False)
-    created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     read_at = Column(DateTime, nullable=True)
 
     # Relationships

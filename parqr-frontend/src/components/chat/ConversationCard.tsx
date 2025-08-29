@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { conversationCardStyles } from '../../styles/chat/conversationCardStyles';
 import { ChatConversationResponse } from '../../types';
+import { formatChatListTime } from '../../utils/timeUtils';
 
 interface ConversationCardProps {
     conversation: ChatConversationResponse;
@@ -14,20 +15,7 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
     currentUserCode,
     onPress
 }) => {
-    const formatTimestamp = (timestamp: string) => {
-        const date = new Date(timestamp);
-        const now = new Date();
-        const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-
-        if (diffInHours < 24) {
-            return date.toLocaleTimeString('en-US', { weekday: 'short'});
-        } else {
-            return date.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric'
-            });
-        }
-    };
+    // Remove the old formatTimestamp function since we're using the utility now
 
     const truncateMessage = (message: string, maxLength: number = 50) => {
         return message.length > maxLength 
@@ -47,6 +35,13 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
     const lastMessage = conversation.last_message;
     const isFromCurrentUser = lastMessage?.sender_user_code === currentUserCode;
     const messagePrefix = isFromCurrentUser ? 'You: ' : '';
+    
+    // Debug: Log what this ConversationCard is actually rendering
+    console.log(`💬 ConversationCard Debug - User: ${conversation.participant_user_code}`);
+    console.log(`💬   Last message ID: ${lastMessage?.id}`);
+    console.log(`💬   Last message content: "${lastMessage?.message_content}"`);
+    console.log(`💬   Last message created_at: ${lastMessage?.created_at}`);
+    console.log(`💬   Last activity: ${conversation.last_activity}`);
     
     return (
         <TouchableOpacity
@@ -68,7 +63,7 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
                         {displayName}
                     </Text>
                     <Text style={conversationCardStyles.timestamp}>
-                        {formatTimestamp(conversation.last_activity)}
+                        {formatChatListTime(conversation.last_activity)}
                     </Text>
                 </View>
 
