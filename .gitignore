@@ -37,11 +37,17 @@ coverage.xml
 env.bak/
 venv.bak/
 
-# React Native
+# React Native / Expo
 node_modules/
 *.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
 .expo/
 *.expo-shared/
+dist/
+web-build/
+expo-env.d.ts
 *.xcworkspace/
 *.xcodeproj/
 build/
@@ -62,8 +68,25 @@ ios/your-appTests/
 ios/your-app.xcshareddata/
 ios/your-app.xcscheme/
 
+# Native builds
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# Metro
+.metro-health-check*
+
+# TypeScript
+*.tsbuildinfo
+
 # Local development config (machine-specific)
 **/development.local.ts
+.env*.local
 
 sprint-roadmaps
 medium-articles
