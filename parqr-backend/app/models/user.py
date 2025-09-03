@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text
+from sqlalchemy.orm import relationship
 from app.db.base import Base
 from datetime import datetime, timezone
 import uuid
@@ -16,3 +17,6 @@ class User(Base):
     qr_code_id = Column(String(50), unique=True, default=lambda: str(uuid.uuid4()))
     qr_image_path = Column(String(500), nullable=True)  # Path to generated QR image file
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
+
+    user_tier = relationship("UserTier", back_populates="user", uselist=False)
+    move_requests = relationship("MoveRequest", back_populates="target_user")
