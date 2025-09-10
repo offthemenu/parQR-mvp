@@ -20,3 +20,4 @@ class User(Base):
 
     user_tier = relationship("UserTier", back_populates="user", uselist=False)
     move_requests = relationship("MoveRequest", back_populates="target_user")
+

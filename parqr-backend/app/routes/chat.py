@@ -13,6 +13,7 @@ from app.schemas.chat_schema import (
     MOVE_CAR_REQUEST_MESSAGE
 )
 from app.dependencies.auth import get_current_user
+from app.middleware.feature_gate import require_premium
 from datetime import datetime, timezone
 import logging
 
