@@ -22,11 +22,12 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/v01/chat", tags=["chat"])
 
 @router.post("/send", response_model=ChatMessageResponse)
-def send_message(
+async def send_message(
     message_data: ChatMessageCreate,
+    _: None = Depends(require_premium),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-):
+) -> ChatMessageResponse:
     """Send a message to another user"""
     logger.info(f"Message send request from {current_user.user_code} to {message_data.recipient_user_code}")
     
@@ -81,8 +82,9 @@ def send_message(
 @router.get("/conversations", response_model=List[ChatConversationResponse])
 def get_conversations(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(require_premium)
+) -> List[ChatConversationResponse]:
     """Get all conversations for current user"""
     logger.info(f"Fetching conversations for user {current_user.user_code}")
     
@@ -186,7 +188,8 @@ def get_conversation_messages(
     limit: int = 50,
     offset: int = 0,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(require_premium)
 ):
     """Get messages in conversation with specific user"""
     logger.info(f"Fetching messages between {current_user.user_code} and {user_code}")
@@ -228,7 +231,8 @@ def get_conversation_messages(
 def mark_messages_as_read(
     request: MarkAsReadRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(require_premium)
 ):
     """Mark messages as read"""
     logger.info(f"Marking {len(request.message_ids)} messages as read for user {current_user.user_code}")
@@ -249,22 +253,3 @@ def mark_messages_as_read(
     
     logger.info(f"Marked {updated_count} messages as read")
     return {"marked_as_read": updated_count}
-
-@router.post("/move-car-request/{user_code}", response_model=ChatMessageResponse)
-def send_move_car_request(
-    user_code: str,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Send a move car request to another user"""
-    logger.info(f"Move car request from {current_user.user_code} to {user_code}")
-    
-    # Create a move car request message
-    message_data = ChatMessageCreate(
-        recipient_user_code=user_code,
-        message_content=MOVE_CAR_REQUEST_MESSAGE,
-        message_type='move_car_request'
-    )
-    
-    # Use the regular send message endpoint
-    return send_message(message_data, db, current_user)

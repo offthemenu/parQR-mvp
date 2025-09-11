@@ -18,6 +18,7 @@ class User(Base):
     qr_image_path = Column(String(500), nullable=True)  # Path to generated QR image file
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
+    cars = relationship("Car", back_populates="owner")
     user_tier = relationship("UserTier", back_populates="user", uselist=False)
     move_requests = relationship("MoveRequest", back_populates="target_user")
 

@@ -13,4 +13,4 @@ class Car(Base):
     car_model = Column(String(50))
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
-    owner = relationship('User', backref='cars')
+    owner = relationship('User', back_populates='cars')

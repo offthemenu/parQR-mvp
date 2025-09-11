@@ -12,6 +12,7 @@ class ParkingSession(Base):
     start_time = Column(DateTime, default=datetime.now(timezone.utc), index=True)
     end_time = Column(DateTime, nullable=True, index=True)
     note_location = Column(String(100), nullable=True)
+    public_message = Column(String(200), nullable=True)
     longitude = Column(Float, nullable=True)
     latitude = Column(Float, nullable=True)
 
