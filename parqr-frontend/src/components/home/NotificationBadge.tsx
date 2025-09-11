@@ -6,11 +6,13 @@ import { notificationBadgeStyles } from "../../styles/home/notificationBadgeStyl
 interface NotificationBadgeProps {
     count: number;
     maxCount?: number;
+    color?: string;
 }
 
 export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
     count,
-    maxCount = 99
+    maxCount = 99,
+    color = '#FF3B30'
 }) => {
     if (count <= 0) {
         return null;
@@ -18,8 +20,11 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
 
     const displayCount = count > maxCount ? `${maxCount}+` : count.toString();
 
-    return(
-        <View style={notificationBadgeStyles.container}>
+    return (
+        <View style={[
+            notificationBadgeStyles.container,
+            { backgroundColor: color }
+        ]}>
             <Text style={notificationBadgeStyles.text}>
                 {displayCount}
             </Text>

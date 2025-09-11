@@ -1,3 +1,37 @@
+import { InteractionManager } from "react-native";
+
+// Navigation types
+export type RootStackParamList = {
+  Splash: undefined;
+  SignIn: undefined;
+  Register: undefined;
+  CarRegistration: {
+    user: UserLookupResponse;
+  };
+  Home: {
+    user: UserLookupResponse | RegisterUserResponse;
+  };
+  Profile: {
+    user: UserLookupResponse | RegisterUserResponse;
+  };
+  PublicProfilePage: {
+    scannedUserCode: string
+  };
+  ParkOutHistory: undefined;
+  QRScanner: undefined; 
+  PublicProfile: { 
+    userCode: string;
+    userData: UserWithCarsResponse; // Privacy-safe type (no phone_number)
+    isWebView?: boolean;
+  };
+  Chat: { 
+    recipientUserCode: string;
+    recipientDisplayName: string;
+    sendMoveCarRequest?: boolean;
+  };
+  ChatList: undefined; 
+};
+
 // User related types
 export interface User {
   id: number;
@@ -6,6 +40,7 @@ export interface User {
   user_code: string;
   qr_code_id: string;
   created_at: string;
+  user_tier: string;
 }
 
 export interface UserWithCarsResponse {
@@ -84,6 +119,18 @@ export interface StartParkingRequest {
   note_location?: string;
 }
 
+// Move Request Types
+export interface MoveRequest {
+  id: number;
+  target_user_id: number;
+  license_plate: string;
+  requester_info: string | null;
+  ip_address: string;
+  created_at: string;
+  viewed_at: string | null;
+  is_read: boolean;
+}
+
 // Chat Message Types
 export interface ChatMessageCreate {
   recipient_user_code: string;
@@ -144,34 +191,6 @@ export interface CountryInfo {
   iso_code: string;
   flag_emoji: string;
 }
-
-// Navigation types
-export type RootStackParamList = {
-  Splash: undefined;
-  SignIn: undefined;
-  Register: undefined;
-  CarRegistration: {
-    user: UserLookupResponse;
-  };
-  Home: {
-    user: UserLookupResponse | RegisterUserResponse;
-  };
-  Profile: {
-    user: UserLookupResponse | RegisterUserResponse;
-  };
-  QRScanner: undefined; 
-  PublicProfile: { 
-    userCode: string;
-    userData: UserWithCarsResponse; // Privacy-safe type (no phone_number)
-    isWebView?: boolean;
-  };
-  Chat: { 
-    recipientUserCode: string;
-    recipientDisplayName: string;
-    sendMoveCarRequest?: boolean;
-  };
-  ChatList: undefined; 
-};
 
 // Phone number formatting types
 export interface PhoneFormatting {
