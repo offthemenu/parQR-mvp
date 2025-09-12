@@ -130,9 +130,8 @@ export const QRScannerScreen: React.FC = () => {
   const handleViewProfile = () => {
     if (foundUser) {
       setShowModal(false);
-      navigation.navigate('PublicProfile', { 
-        userCode: foundUser.user_code,
-        userData: foundUser 
+      navigation.navigate('PublicProfilePage', { 
+        scannedUserCode: foundUser.user_code
       });
     }
   };
@@ -150,10 +149,9 @@ export const QRScannerScreen: React.FC = () => {
   const handleRequestCarMove = () => {
     if (foundUser) {
       setShowModal(false);
-      navigation.navigate('Chat', {
-        recipientUserCode: foundUser.user_code,
-        recipientDisplayName: foundUser.profile_display_name || foundUser.user_code,
-        sendMoveCarRequest: true
+      navigation.navigate('PublicProfilePage', {
+        scannedUserCode: foundUser.user_code,
+        showMoveRequestForm: true
       });
     }
   };

@@ -6,7 +6,7 @@ export type RootStackParamList = {
   SignIn: undefined;
   Register: undefined;
   CarRegistration: {
-    user: UserLookupResponse;
+    user: UserLookupResponse | RegisterUserResponse;
   };
   Home: {
     user: UserLookupResponse | RegisterUserResponse;
@@ -15,7 +15,8 @@ export type RootStackParamList = {
     user: UserLookupResponse | RegisterUserResponse;
   };
   PublicProfilePage: {
-    scannedUserCode: string
+    scannedUserCode: string;
+    showMoveRequestForm?: boolean;
   };
   ParkOutHistory: undefined;
   QRScanner: undefined; 
@@ -69,6 +70,7 @@ export interface UserLookupResponse {
   profile_display_name?: string;
   qr_image_path?: string;
   signup_country_iso: string;
+  user_tier: string;
 }
 
 // Car related types
@@ -180,6 +182,7 @@ export interface RegisterUserResponse {
   qr_code_id: string;
   created_at: string;
   signup_country_iso: string;
+  user_tier: string;
 }
 
 export interface ServicingCountriesResponse {

@@ -4,6 +4,10 @@ export const homeScreenStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    position: 'relative',
+  },
+  scrollView: {
+    flex: 1,
   },
   header: {
     backgroundColor: '#007AFF',
@@ -84,5 +88,28 @@ export const homeScreenStyles = StyleSheet.create({
   parkingSection: {
     paddingHorizontal: 20,
     paddingVertical: 10,
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 30,
+    right: 30,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8, // Android shadow
+  },
+  floatingButtonText: {
+    fontSize: 24,
+    color: 'white',
   },
 });

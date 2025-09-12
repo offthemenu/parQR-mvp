@@ -5,6 +5,84 @@ export const publicProfileStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  
+  // ID Card Header Section
+  header: {
+    padding: 20,
+    backgroundColor: '#f8f8f8',
+    alignItems: 'center',
+  },
+  userCode: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  carInfo: {
+    fontSize: 18,
+    color: '#555',
+    marginTop: 8,
+  },
+  parkingStatus: {
+    fontSize: 16,
+    marginTop: 4,
+    color: '#666',
+    textTransform: 'capitalize',
+  },
+  publicMessage: {
+    fontSize: 14,
+    marginTop: 8,
+    color: '#333',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  
+  // Request Section
+  requestSection: {
+    padding: 20,
+  },
+  instruction: {
+    fontSize: 16,
+    marginBottom: 16,
+    color: '#333',
+    textAlign: 'center',
+  },
+  licensePlateInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    fontSize: 16,
+    backgroundColor: '#fff',
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  button: {
+    flex: 1,
+    backgroundColor: '#007AFF',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  messageButton: {
+    backgroundColor: '#34C759',
+  },
+  buttonDisabled: {
+    backgroundColor: '#ccc',
+    opacity: 0.6,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+
+  // Legacy styles (keeping for backward compatibility)
   closeButton: {
     position: 'absolute',
     top: 50,

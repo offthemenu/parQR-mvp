@@ -1,7 +1,5 @@
-import { User } from "../types";
-
-export const useFeatureGating = (user: User) => {
-    const isPremium = user.user_tier === 'premium';
+export const useFeatureGating = (userTier: string) => {
+    const isPremium = userTier === 'premium';
 
     return {
         canAccessChat: isPremium,
