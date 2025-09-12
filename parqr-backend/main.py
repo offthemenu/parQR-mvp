@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from app.db.session import engine
 from app.db.base import Base
-from app.routes import car, health_check, parking, user, signup, chat
+from app.routes import car, health_check, parking, user, signup, chat, move_requests, public_profile
 
 load_dotenv(override=True)
 
@@ -73,6 +73,8 @@ app.include_router(car.router, prefix= "/api")
 app.include_router(parking.router, prefix= "/api")
 app.include_router(signup.router, prefix = "/api")
 app.include_router(chat.router, prefix="/api")
+app.include_router(public_profile.router, prefix="/api")
+app.include_router(move_requests.router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn

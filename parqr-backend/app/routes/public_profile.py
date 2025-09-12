@@ -2,13 +2,13 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from app.db.session import get_db
+from app.db.base import get_db
 from app.models.user import User
 from app.models.car import Car
 from app.models.parking_session import ParkingSession
 from app.schemas.public_profile_schema import PublicProfileResponse
 
-router = APIRouter(prefix="/api/v01/public_profile", tags=["public_profile"])
+router = APIRouter(prefix="/v01/public_profile", tags=["public_profile"])
 
 @router.get("/{user_code}", response_model=PublicProfileResponse)
 async def get_public_profile(

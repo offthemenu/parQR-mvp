@@ -3,7 +3,7 @@ from typing import Callable, Any
 from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
 
-from ..db.session import get_db
+from ..db.base import get_db
 from ..models.user import User
 from ..models.user_tier import UserTier
 from ..dependencies.auth import get_current_user
