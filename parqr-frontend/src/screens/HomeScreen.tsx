@@ -24,7 +24,7 @@ export const HomeScreen: React.FC = () => {
   const { user } = route.params;
   // feature gating for chat section
   const { canAccessChat } = useFeatureGating(user.user_tier);
-  
+
   const { totalUnreadCount, refreshUnreadCount } = useChatNotifications({
     currentUserCode: user.user_code,
     enabled: canAccessChat, // Only enable for premium users
@@ -44,6 +44,13 @@ export const HomeScreen: React.FC = () => {
 
   const handleViewChats = () => {
     navigation.navigate('ChatList');
+  };
+
+  // Navigation handler
+  const handleParkOutHistoryPress = () => {
+    navigation.navigate("ParkOutHistory", {
+      userCode: user.user_code
+    });
   };
 
   // state for parking session
@@ -86,12 +93,12 @@ export const HomeScreen: React.FC = () => {
 
     // For now, use the first car. In a full implementation, show car selection
     const carId = user.cars[0].id;
-    
+
     setIsLoadingParking(true);
-    
+
     try {
       const parkingSession = await ParkingService.startParkingSession({ car_id: carId });
-      
+
       setActiveSession(parkingSession);
       Alert.alert('Parking Started', 'Your parking session has begun.');
     } catch (error) {
@@ -108,94 +115,95 @@ export const HomeScreen: React.FC = () => {
   return (
     <View style={homeScreenStyles.container}>
       <ScrollView style={homeScreenStyles.scrollView}>
-      {/* Header Section */}
-      <View style={homeScreenStyles.header}>
-        <View style={homeScreenStyles.headerContent}>
-          <Text style={homeScreenStyles.welcomeText}>
-            Welcome back, {'profile_display_name' in user ? (user.profile_display_name || user.user_code) : user.user_code}!
-          </Text>
-          
-          {/* Chat and Profile buttons in header */}
-          <View style={homeScreenStyles.headerButtons}>
-            {canAccessChat && (
-              <TouchableOpacity 
+        {/* Header Section */}
+        <View style={homeScreenStyles.header}>
+          <View style={homeScreenStyles.headerContent}>
+            <Text style={homeScreenStyles.welcomeText}>
+              Welcome back, {'profile_display_name' in user ? (user.profile_display_name || user.user_code) : user.user_code}!
+            </Text>
+
+            {/* Chat and Profile buttons in header */}
+            <View style={homeScreenStyles.headerButtons}>
+              {canAccessChat && (
+                <TouchableOpacity
+                  style={homeScreenStyles.headerButton}
+                  onPress={handleViewChats}
+                >
+                  <Text style={homeScreenStyles.headerButtonText}>💬</Text>
+                  <NotificationBadge count={totalUnreadCount} />
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
                 style={homeScreenStyles.headerButton}
-                onPress={handleViewChats}
+                onPress={handleViewProfile}
               >
-                <Text style={homeScreenStyles.headerButtonText}>💬</Text>
-                <NotificationBadge count={totalUnreadCount} />
+                <Text style={homeScreenStyles.headerButtonText}>👤</Text>
               </TouchableOpacity>
-            )}
-            
-            <TouchableOpacity 
-              style={homeScreenStyles.headerButton}
-              onPress={handleViewProfile}
-            >
-              <Text style={homeScreenStyles.headerButtonText}>👤</Text>
-            </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
 
-      {/* RegisteredCarPanel - Active car details */}
-      {'cars' in user && user.cars && user.cars.length > 0 ? (
-        <View style={homeScreenStyles.carsSection}>
-          <Text style={homeScreenStyles.sectionTitle}>Active Vehicle</Text>
-          {/* Show first car as active - in full implementation, this would be user-selectable */}
-          <View style={homeScreenStyles.carCard}>
-            <Text style={homeScreenStyles.carInfo}>
-              🚗 {user.cars[0].car_brand} {user.cars[0].car_model}
-            </Text>
-            <Text style={homeScreenStyles.licensePlate}>
-              Your Active Vehicle
-            </Text>
-            {user.cars.length > 1 && (
+        {/* RegisteredCarPanel - Active car details */}
+        {'cars' in user && user.cars && user.cars.length > 0 ? (
+          <View style={homeScreenStyles.carsSection}>
+            <Text style={homeScreenStyles.sectionTitle}>Active Vehicle</Text>
+            {/* Show first car as active - in full implementation, this would be user-selectable */}
+            <View style={homeScreenStyles.carCard}>
               <Text style={homeScreenStyles.carInfo}>
-                +{user.cars.length - 1} more vehicle{user.cars.length > 2 ? 's' : ''}
+                🚗 {user.cars[0].car_brand} {user.cars[0].car_model}
               </Text>
-            )}
+              <Text style={homeScreenStyles.licensePlate}>
+                Your Active Vehicle
+              </Text>
+              {user.cars.length > 1 && (
+                <Text style={homeScreenStyles.carInfo}>
+                  +{user.cars.length - 1} more vehicle{user.cars.length > 2 ? 's' : ''}
+                </Text>
+              )}
+            </View>
           </View>
-        </View>
-      ) : (
-        <View style={homeScreenStyles.carsSection}>
-          <Text style={homeScreenStyles.sectionTitle}>No Registered Vehicle</Text>
-          <ActionButton
-            title="📝 Register a Car"
-            onPress={() => navigation.navigate('CarRegistration', { user })}
-            variant="secondary"
-          />
-        </View>
-      )}
+        ) : (
+          <View style={homeScreenStyles.carsSection}>
+            <Text style={homeScreenStyles.sectionTitle}>No Registered Vehicle</Text>
+            <ActionButton
+              title="📝 Register a Car"
+              onPress={() => navigation.navigate('CarRegistration', { user })}
+              variant="secondary"
+            />
+          </View>
+        )}
 
-      {/* StartParking - Parking controls */}
-      {activeSession && (
-        <ParkingSessionCard
-          session={activeSession}
-          onSessionEnded={handleSessionEnded}
-          userCountryISO={user.signup_country_iso}
+        {/* StartParking - Parking controls */}
+        {activeSession && (
+          <ParkingSessionCard
+            session={activeSession}
+            onSessionEnded={handleSessionEnded}
+            userCountryISO={user.signup_country_iso}
+          />
+        )}
+
+        {!activeSession && (
+          <View style={homeScreenStyles.parkingSection}>
+            <ActionButton
+              title="🚗 Start Parking"
+              onPress={handleStartParking}
+              variant="secondary"
+            />
+          </View>
+        )}
+
+        {/* ParkOutRequests - Move requests (prominent position) */}
+        <ParkOutRequestsSection
+          userCode={user?.user_code || ''}
+          unreadCount={moveRequestsUnreadCount}  // FIXED: Added required unreadCount prop
+          onPress={handleParkOutHistoryPress}
         />
-      )}
 
-      {!activeSession && (
-        <View style={homeScreenStyles.parkingSection}>
-          <ActionButton
-            title="🚗 Start Parking"
-            onPress={handleStartParking}
-            variant="secondary"
-          />
-        </View>
-      )}
+        {/* Removed QR scan from main content - now floating */}
 
-      {/* ParkOutRequests - Move requests (prominent position) */}
-      <ParkOutRequestsSection 
-        unreadCount={moveRequestsUnreadCount}
-        onPress={() => navigation.navigate('ParkOutHistory')}
-      />
-
-      {/* Removed QR scan from main content - now floating */}
-
-      {/* QR Code Display - Your QR code for others to scan */}
-      {/* <View style={homeScreenStyles.qrSection}>
+        {/* QR Code Display - Your QR code for others to scan */}
+        {/* <View style={homeScreenStyles.qrSection}>
         <Text style={homeScreenStyles.sectionTitle}>Your QR Code</Text>
         <QRCodeDisplay
           qrCodeId={user.qr_code_id}
@@ -209,12 +217,12 @@ export const HomeScreen: React.FC = () => {
       </ScrollView>
 
       {/* Floating QR Scan Button */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={homeScreenStyles.floatingButton}
         onPress={handleQRScan}
         activeOpacity={0.8}
       >
-        <Text style={homeScreenStyles.floatingButtonText}>📷</Text>
+        <Text style={homeScreenStyles.floatingButtonText}>Scan</Text>
       </TouchableOpacity>
     </View>
   );

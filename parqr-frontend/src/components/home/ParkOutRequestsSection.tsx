@@ -1,30 +1,35 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { NotificationBadge } from "./NotificationBadge";
-import { parkOutRequestsSectionStyles } from "../../styles/home/parkOutRequestsSectionStyles"; 
+import { parkOutRequestsSectionStyles } from "../../styles/home/parkOutRequestsSectionStyles";
 
 interface ParkOutRequestsSectionProps {
+    userCode: string;
     unreadCount: number;
-    onPress: () => void;
+    onPress: () => void; // ADD this prop
 }
 
 export const ParkOutRequestsSection: React.FC<ParkOutRequestsSectionProps> = ({
+    userCode,
     unreadCount,
     onPress
 }) => {
     return (
-        <View style={parkOutRequestsSectionStyles.container}>
-            <TouchableOpacity style={parkOutRequestsSectionStyles.header} onPress={onPress}>
-                <Text style={parkOutRequestsSectionStyles.title}>Park Out Requests</Text>
+        <TouchableOpacity
+            style={parkOutRequestsSectionStyles.container}
+            onPress={onPress}
+            activeOpacity={0.7}
+        >
+            <View style={parkOutRequestsSectionStyles.header}>
+                <Text style={parkOutRequestsSectionStyles.title}>Park-Out Requests</Text>
                 {unreadCount > 0 && (
-                    <NotificationBadge count={unreadCount} color="#007AFF" />
+                    <View style={parkOutRequestsSectionStyles.badge}>
+                        <Text style={parkOutRequestsSectionStyles.badgeText}>{unreadCount}</Text>
+                    </View>
                 )}
-            </TouchableOpacity>
-
-            {/* Simple preview - will be enhanced later */}
-            <Text style={parkOutRequestsSectionStyles.previewText}>
-                {unreadCount > 0 ? `${unreadCount} new requests` : 'No new requests'}
-            </Text>
-        </View>
+                {/* ADD navigation arrow */}
+                <Text style={parkOutRequestsSectionStyles.arrow}>›</Text>
+            </View>
+        </TouchableOpacity>
     )
 }

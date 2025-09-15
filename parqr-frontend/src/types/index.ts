@@ -18,7 +18,9 @@ export type RootStackParamList = {
     scannedUserCode: string;
     showMoveRequestForm?: boolean;
   };
-  ParkOutHistory: undefined;
+  ParkOutHistory: {
+    userCode: string;
+  };
   QRScanner: undefined; 
   PublicProfile: { 
     userCode: string;
@@ -30,7 +32,7 @@ export type RootStackParamList = {
     recipientDisplayName: string;
     sendMoveCarRequest?: boolean;
   };
-  ChatList: undefined; 
+  ChatList: undefined;
 };
 
 // User related types

@@ -11,6 +11,7 @@ import { QRScannerScreen } from './src/screens/QRScannerScreen';
 import { PublicProfileScreen } from './src/screens/PublicProfileScreen';
 import { ChatScreen } from './src/screens/ChatScreen';         
 import { ChatListScreen } from './src/screens/ChatListScreen'; 
+import { ParkOutHistoryScreen } from './src/screens/ParkOutHistoryScreen';
 import { RootStackParamList } from './src/types';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -105,6 +106,17 @@ export default function App() {
           component={ChatListScreen}
           options={{ 
             title: 'Messages'
+          }}
+        />
+        <Stack.Screen
+          name="ParkOutHistory"
+          component={ParkOutHistoryScreen}
+          options={{
+            title: 'Park-Out History',
+            headerStyle: {
+              backgroundColor: '#007AFF',
+            },
+            headerTintColor: '#fff',
           }}
         />
        

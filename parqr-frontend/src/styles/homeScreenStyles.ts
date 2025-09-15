@@ -11,7 +11,7 @@ export const homeScreenStyles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#007AFF',
-    paddingTop: 10,
+    paddingTop: 20,
     paddingBottom: 20,
     paddingHorizontal: 20,
   },
@@ -109,7 +109,8 @@ export const homeScreenStyles = StyleSheet.create({
     elevation: 8, // Android shadow
   },
   floatingButtonText: {
-    fontSize: 24,
+    fontSize: 15,
+    fontWeight: 'bold',
     color: 'white',
   },
 });
