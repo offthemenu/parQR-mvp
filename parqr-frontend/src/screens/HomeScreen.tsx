@@ -15,6 +15,7 @@ import { ParkingService } from '../services/parkingService';
 import { ParkingSessionCard } from '../components/home/ParkingSessionCard';
 import { ParkingSession } from '../types';
 import { ParkOutRequestsSection } from '../components/home/ParkOutRequestsSection';
+import { ParkingHistorySection } from '../components/home/ParkingHistorySection';
 
 type HomeScreenRouteProp = RouteProp<RootStackParamList, 'Home'>;
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
@@ -52,6 +53,12 @@ export const HomeScreen: React.FC = () => {
       userCode: user.user_code
     });
   };
+
+  const handleParkingHistoryPress = () => {
+    navigation.navigate("ParkingHistory", {
+      userCode: user.user_code
+    });
+  }
 
   // state for parking session
   const [activeSession, setActiveSession] = useState<ParkingSession | null>(null);
@@ -199,6 +206,13 @@ export const HomeScreen: React.FC = () => {
           unreadCount={moveRequestsUnreadCount}  // FIXED: Added required unreadCount prop
           onPress={handleParkOutHistoryPress}
         />
+
+        {user?.user_code && (
+          <ParkingHistorySection
+            userCode={user.user_code}
+            onPress={handleParkingHistoryPress}
+          />
+        )}
 
         {/* Removed QR scan from main content - now floating */}
 

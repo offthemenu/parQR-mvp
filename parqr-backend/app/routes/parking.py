@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 from app.schemas.parking_schema import ParkingSessionCreate, ParkingSessionOut, ParkingSessionEnd
 from typing import List
-from app.models import parking_session as parking_model
+from app.models.parking_session import ParkingSession
 from app.db.base import get_db
 from app.dependencies.auth import get_current_user
 from app.models.car import Car
@@ -36,7 +36,7 @@ def start_parking(
     logger.info(f"Parking session data: {parking_data}")
     
     start_time = datetime.now(timezone.utc)
-    new_session = parking_model.ParkingSession(
+    new_session = ParkingSession(
         user_id=current_user.id,
         car_id=session_data.car_id,
         start_time=start_time,
@@ -67,9 +67,9 @@ def end_parking(
     logger.info(f"Ending parking session request for session_id: {data.session_id}, user_id: {current_user.id}")
     
     # Verify session exists and belongs to current user
-    session = db.query(parking_model.ParkingSession).filter(
-        parking_model.ParkingSession.id == data.session_id,
-        parking_model.ParkingSession.user_id == current_user.id
+    session = db.query(ParkingSession).filter(
+        ParkingSession.id == data.session_id,
+        ParkingSession.user_id == current_user.id
     ).first()
     
     if not session:
@@ -104,9 +104,9 @@ def get_active_sessions(
     logger.info(f"Getting active parking sessions for user_id: {current_user.id}")
     
     # Get active sessions (end_time is null) for the current user
-    active_sessions = db.query(parking_model.ParkingSession).filter(
-        parking_model.ParkingSession.user_id == current_user.id,
-        parking_model.ParkingSession.end_time.is_(None)
+    active_sessions = db.query(ParkingSession).filter(
+        ParkingSession.user_id == current_user.id,
+        ParkingSession.end_time.is_(None)
     ).all()
     
     # Ensure timezone is included in the response for all sessions
@@ -119,3 +119,23 @@ def get_active_sessions(
     logger.info(f"Found {len(active_sessions)} active sessions for user {current_user.id}")
     
     return {"active_sessions": active_sessions}
+
+@router.get("/history", response_model=List[ParkingSessionOut])
+def get_parking_history(
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """
+        Get user's parking history with optional limit
+    """
+    logger.info(f"Getting parking history for user: {current_user.id}")
+
+    sessions = db.query(ParkingSession).filter(
+        ParkingSession.user_id == current_user.id
+    ).order_by(
+        ParkingSession.start_time.desc()
+    ).limit(limit).all()
+
+    logger.info(f"Found {len(sessions)} parking sessions")
+    return sessions

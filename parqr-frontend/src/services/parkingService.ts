@@ -23,7 +23,7 @@ export class ParkingService {
             if (noteLocation) {
                 requestData.note_location = noteLocation;
             }
-            
+
             const response = await apiClient.post('/v01/parking/end', requestData);
             return response.data
         } catch (error: any) {
@@ -43,18 +43,38 @@ export class ParkingService {
     }
 
     static calculateSessionDuration(startTime: string, endTime?: string):
-    string{
+        string {
         const start = new Date(startTime);
         const end = endTime ? new Date(endTime) : new Date();
-        
         const durationMs = end.getTime() - start.getTime();
         const hours = Math.floor(durationMs / (1000 * 60 * 60));
         const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-        
+
         if (hours > 0) {
-        return `${hours}h ${minutes}m`;
+            return `${hours}h ${minutes}m`;
         } else {
-        return `${minutes}m`;
+            return `${minutes}m`;
+        }
+    }
+
+    static async getParkingHistory(limit?: number): Promise<ParkingSession[]> {
+        try {
+            const params = limit ? { limit } : {};
+            const response = await apiClient.get("/v01/parking/history", { params });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching parking history:", error);
+            throw error;
+        }
+    }
+
+    static async getParkingHistoryPreview(): Promise<ParkingSession[]> {
+        try {
+            // Get parking sessions for Homescreen preview
+            return await this.getParkingHistory(3);
+        } catch (error) {
+            console.error("Error fetching parking history preview:", error);
+            return [] // in case of an error, defend it by returning an empty array
         }
     }
 }

@@ -21,6 +21,9 @@ export type RootStackParamList = {
   ParkOutHistory: {
     userCode: string;
   };
+  ParkingHistory: {
+    userCode: string;
+  };
   QRScanner: undefined; 
   PublicProfile: { 
     userCode: string;
