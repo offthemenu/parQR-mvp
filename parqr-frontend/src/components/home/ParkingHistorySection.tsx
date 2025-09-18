@@ -8,11 +8,13 @@ import { formatLocalTime, calculateParkingDuration } from "../../utils/timeUtils
 interface ParkingHistorySectionProps {
     userCode: string;
     onPress: () => void;
+    refreshTrigger?: number;
 }
 
 export const ParkingHistorySection: React.FC<ParkingHistorySectionProps> = ({
     userCode,
-    onPress
+    onPress,
+    refreshTrigger
 }) => {
     const [recentSessions, setRecentSessions] = useState<ParkingSession[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +35,7 @@ export const ParkingHistorySection: React.FC<ParkingHistorySectionProps> = ({
 
     useEffect(() => {
         fetchRecentSessions();
-    }, [userCode]);
+    }, [userCode, refreshTrigger]);
 
     if (isLoading) {
         return (

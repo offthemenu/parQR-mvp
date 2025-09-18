@@ -80,3 +80,52 @@ def get_public_car_info(
     
     logger.info(f"Returning public info for car: {car.license_plate}")
     return CarPublicResponse.from_car(car)
+
+@router.delete("/remove/{car_id}", response_model=dict)
+def remove_car(
+    car_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Remove user's car - with ownership verification"""
+    logger.info(f"Remove car requests: {car_id=:}, user_id={current_user.id}")
+
+    # Find car and verify ownership
+    car = db.query(Car).filter(
+        Car.id == car_id,
+        Car.owner_id == current_user.id
+    ).first()
+
+    if not car:
+        logger.warning(f"Car not found or not woned by user: car_id={car_id}, user_id={current_user.id}")
+        raise HTTPException(status_code=404, detail="Car not found or not authorized")
+    
+    # Check if user has other cars (precent removing last car)
+    user_car_count = db.query(Car).filter(
+        Car.owner_id == current_user.id
+    ).count()
+
+    if user_car_count <= 1:
+        logger.warning(f"Cannot remove last car for user_id={current_user.id}")
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot remove your only car. Please register another car first."
+        )
+    
+    try:
+        license_plate = car.license_plate
+        db.delete(car)
+        db.commit()
+
+        logger.info(f"Car removed successfully: {license_plate}")
+        return {
+            "message": f"Car {license_plate} removed successfully!"
+        }
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed to remove car: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to remove car"
+        )
+    

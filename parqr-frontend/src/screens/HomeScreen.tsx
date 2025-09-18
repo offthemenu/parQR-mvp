@@ -16,6 +16,7 @@ import { ParkingSessionCard } from '../components/home/ParkingSessionCard';
 import { ParkingSession } from '../types';
 import { ParkOutRequestsSection } from '../components/home/ParkOutRequestsSection';
 import { ParkingHistorySection } from '../components/home/ParkingHistorySection';
+import { RegisteredCarPanel } from '../components/home/RegisteredCarPanel';
 
 type HomeScreenRouteProp = RouteProp<RootStackParamList, 'Home'>;
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
@@ -35,6 +36,7 @@ export const HomeScreen: React.FC = () => {
   const { moveRequestsUnreadCount } = useMoveRequestNotifications(user.user_code);
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
+  // Navigation handlers
   const handleQRScan = () => {
     navigation.navigate('QRScanner');
   };
@@ -47,7 +49,6 @@ export const HomeScreen: React.FC = () => {
     navigation.navigate('ChatList');
   };
 
-  // Navigation handler
   const handleParkOutHistoryPress = () => {
     navigation.navigate("ParkOutHistory", {
       userCode: user.user_code
@@ -60,9 +61,14 @@ export const HomeScreen: React.FC = () => {
     });
   }
 
+  const handleManageCars = () => {
+    navigation.navigate("CarManagement")
+  }
+
   // state for parking session
   const [activeSession, setActiveSession] = useState<ParkingSession | null>(null);
   const [isLoadingParking, setIsLoadingParking] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // useEffect to fetch active parking session
   useEffect(() => {
@@ -107,6 +113,7 @@ export const HomeScreen: React.FC = () => {
       const parkingSession = await ParkingService.startParkingSession({ car_id: carId });
 
       setActiveSession(parkingSession);
+      setRefreshTrigger(prev => prev + 1); // Refresh parking history
       Alert.alert('Parking Started', 'Your parking session has begun.');
     } catch (error) {
       Alert.alert('Error', 'Unable to start parking session. Please try again.');
@@ -117,6 +124,7 @@ export const HomeScreen: React.FC = () => {
 
   const handleSessionEnded = () => {
     setActiveSession(null);
+    setRefreshTrigger(prev => prev + 1); // Refresh parking history when session ends
   };
 
   return (
@@ -153,23 +161,10 @@ export const HomeScreen: React.FC = () => {
 
         {/* RegisteredCarPanel - Active car details */}
         {'cars' in user && user.cars && user.cars.length > 0 ? (
-          <View style={homeScreenStyles.carsSection}>
-            <Text style={homeScreenStyles.sectionTitle}>Active Vehicle</Text>
-            {/* Show first car as active - in full implementation, this would be user-selectable */}
-            <View style={homeScreenStyles.carCard}>
-              <Text style={homeScreenStyles.carInfo}>
-                🚗 {user.cars[0].car_brand} {user.cars[0].car_model}
-              </Text>
-              <Text style={homeScreenStyles.licensePlate}>
-                Your Active Vehicle
-              </Text>
-              {user.cars.length > 1 && (
-                <Text style={homeScreenStyles.carInfo}>
-                  +{user.cars.length - 1} more vehicle{user.cars.length > 2 ? 's' : ''}
-                </Text>
-              )}
-            </View>
-          </View>
+          <RegisteredCarPanel
+            car={user.cars[0]}
+            onManageCars={handleManageCars}
+          />
         ) : (
           <View style={homeScreenStyles.carsSection}>
             <Text style={homeScreenStyles.sectionTitle}>No Registered Vehicle</Text>
@@ -211,6 +206,7 @@ export const HomeScreen: React.FC = () => {
           <ParkingHistorySection
             userCode={user.user_code}
             onPress={handleParkingHistoryPress}
+            refreshTrigger={refreshTrigger}
           />
         )}
 

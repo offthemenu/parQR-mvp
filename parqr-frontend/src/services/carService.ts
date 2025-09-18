@@ -29,4 +29,23 @@ export class CarService {
       throw error;
     }
   }
+
+  static async removeCar(carId: number): Promise<void> {
+    try {
+      const response = await apiClient.delete(`/v01/car/remove/${carId}`);
+      return response.data
+    } catch (error: any) {
+      console.error("Remove car error:", error.response?.data || error.message);
+
+      // Handle specific error cases for better UX
+      if (error.response?.status === 400) {
+        throw new Error("Cannot remove your only car. Please register another car first.");
+      }
+      if (error.response?.status === 404) {
+        throw new Error("Car not found or not authorized to remove.");
+      }
+
+      throw new Error("Failed to remove car. Please try again.");
+    }
+  } 
 }

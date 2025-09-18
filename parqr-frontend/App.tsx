@@ -13,6 +13,7 @@ import { ChatScreen } from './src/screens/ChatScreen';
 import { ChatListScreen } from './src/screens/ChatListScreen'; 
 import { ParkOutHistoryScreen } from './src/screens/ParkOutHistoryScreen';
 import { ParkingHistoryScreen } from './src/screens/ParkingHistoryScreen';
+import { CarManagementScreen } from './src/screens/CarManagementScreen';
 import { RootStackParamList } from './src/types';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -76,6 +77,17 @@ export default function App() {
           component={ProfileScreen}
           options={{ 
             title: 'Profile'
+          }}
+        />
+        <Stack.Screen
+          name="CarManagement"
+          component={CarManagementScreen}
+          options={{
+            title: 'Manage Cars',
+            headerStyle: {
+              backgroundColor: '#007AFF',
+            },
+            headerTintColor: '#fff',
           }}
         />
         <Stack.Screen 
