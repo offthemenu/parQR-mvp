@@ -16,7 +16,7 @@ export const EditCarScreen: React.FC = () => {
     const { carData } = route.params;
 
     const [licensePlate, setLicensePlate] = useState(carData.license_plate);
-    const [carBrand, setCarBrand] = useState(carData.car_model);
+    const [carBrand, setCarBrand] = useState(carData.car_brand);
     const [carModel, setCarModel] = useState(carData.car_model);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
