@@ -128,4 +128,21 @@ export const carManagementStyles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '600',
     },
+    premiumPrompt: {
+        backgroundColor: '#F2F2F7',
+        marginHorizontal: 20,
+        marginVertical: 16,
+        paddingVertical: 20,
+        paddingHorizontal: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#E5E5EA',
+    },
+    premiumText: {
+        color: '#8E8E93',
+        fontSize: 16,
+        fontWeight: '500',
+        textAlign: 'center',
+    },
 })

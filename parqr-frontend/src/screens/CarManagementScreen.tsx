@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, TouchableOpacity, Alert, RefreshControl } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { CarService } from "../services/carService";
+import { UserService } from "../services/userService";
+import { useFeatureGating } from "../hooks/useFeatureGating";
 import { CarOwnerResponse } from "../types";
 import { carManagementStyles } from "../styles/carManagementStyles";
 
@@ -14,11 +16,18 @@ export const CarManagementScreen: React.FC<CarManagementScreenProps> = ({ naviga
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [activeCar, setActiveCar] = useState<CarOwnerResponse | null>(null);
+    const [userTier, setUserTier] = useState<string>('basic');
+    
+    const { canAddCars } = useFeatureGating(userTier);
 
     const fetchUserCars = async (showLoading = true) => {
         try {
             if (showLoading) setIsLoading(true);
 
+            // Get user profile for tier information
+            const userProfile = await UserService.getUserProfile();
+            setUserTier(userProfile.user_tier);
+            
             // Get user profile with cars
             const userCars = await CarService.getUserCars();
             setCars(userCars);
@@ -171,12 +180,20 @@ export const CarManagementScreen: React.FC<CarManagementScreenProps> = ({ naviga
                     </View>
                 }
                 ListFooterComponent={
-                    <TouchableOpacity
-                        style={carManagementStyles.addCarButton}
-                        onPress={handleAddCar}
-                    >
-                        <Text style={carManagementStyles.addCarButtonText}>+ Add New Car</Text>
-                    </TouchableOpacity>
+                    canAddCars ? (
+                        <TouchableOpacity
+                            style={carManagementStyles.addCarButton}
+                            onPress={handleAddCar}
+                        >
+                            <Text style={carManagementStyles.addCarButtonText}>+ Add New Car</Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <View style={carManagementStyles.premiumPrompt}>
+                            <Text style={carManagementStyles.premiumText}>
+                                Upgrade to Premium to add multiple cars
+                            </Text>
+                        </View>
+                    )
                 }
             />
         </View>

@@ -5,5 +5,6 @@ export const useFeatureGating = (userTier: string) => {
         canAccessChat: isPremium,
         canSendMessages: isPremium,
         canCreateGroups: isPremium,
+        canAddCars: isPremium,
     };
 };

@@ -113,4 +113,20 @@ export const homeScreenStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
   },
+  premiumPrompt: {
+    backgroundColor: '#F2F2F7',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
+    marginTop: 10,
+  },
+  premiumText: {
+    color: '#8E8E93',
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
 });

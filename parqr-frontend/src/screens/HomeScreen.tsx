@@ -26,8 +26,8 @@ export const HomeScreen: React.FC = () => {
   const route = useRoute<HomeScreenRouteProp>();
   const { user } = route.params;
   const [currentUser, setCurrentUser] = useState(user);
-  // feature gating for chat section
-  const { canAccessChat } = useFeatureGating(user.user_tier);
+  // feature gating for chat section and car management
+  const { canAccessChat, canAddCars } = useFeatureGating(user.user_tier);
 
   const { totalUnreadCount, refreshUnreadCount } = useChatNotifications({
     currentUserCode: user.user_code,
@@ -186,11 +186,19 @@ export const HomeScreen: React.FC = () => {
         ) : (
           <View style={homeScreenStyles.carsSection}>
             <Text style={homeScreenStyles.sectionTitle}>No Registered Vehicle</Text>
-            <ActionButton
-              title="📝 Register a Car"
-              onPress={() => navigation.navigate('CarRegistration', { user: currentUser })}
-              variant="secondary"
-            />
+            {canAddCars ? (
+              <ActionButton
+                title="📝 Register a Car"
+                onPress={() => navigation.navigate('CarRegistration', { user: currentUser })}
+                variant="secondary"
+              />
+            ) : (
+              <View style={homeScreenStyles.premiumPrompt}>
+                <Text style={homeScreenStyles.premiumText}>
+                  Upgrade to Premium to register multiple cars
+                </Text>
+              </View>
+            )}
           </View>
         )}
 
