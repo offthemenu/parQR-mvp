@@ -77,4 +77,14 @@ export class ParkingService {
             return [] // in case of an error, defend it by returning an empty array
         }
     }
+
+    static async getPublicParkingHistory(userCode: string): Promise<ParkingSession[]> {
+        try {
+            const response = await apiClient.get(`/v01/public_profile/parking_history/${userCode}`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching public parking history:", error);
+            return [];
+        }
+    }
 }

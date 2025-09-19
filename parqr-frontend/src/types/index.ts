@@ -32,6 +32,7 @@ export type RootStackParamList = {
   };
   QRScanner: undefined; 
   PublicProfile: { 
+    user?: UserLookupResponse | RegisterUserResponse;
     userCode: string;
     userData: UserWithCarsResponse; // Privacy-safe type (no phone_number)
     isWebView?: boolean;

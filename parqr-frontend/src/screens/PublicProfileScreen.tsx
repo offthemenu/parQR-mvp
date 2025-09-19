@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -6,6 +6,9 @@ import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types';
 import { publicProfileStyles } from '../styles/publicProfileStyles';
 import { ChatService } from '../services/chatService';
+import { ParkingService } from '../services/parkingService';
+import { ParkingSession } from '../types';
+import { formatLocalTime, calculateParkingDuration } from '../utils/timeUtils';
 
 type PublicProfileScreenRouteProp = RouteProp<RootStackParamList, 'PublicProfile'>;
 type PublicProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'PublicProfile'>;
@@ -13,8 +16,10 @@ type PublicProfileScreenNavigationProp = StackNavigationProp<RootStackParamList,
 export const PublicProfileScreen: React.FC = () => {
   const route = useRoute<PublicProfileScreenRouteProp>();
   const navigation = useNavigation<PublicProfileScreenNavigationProp>();
-  const { userCode, userData, isWebView = false } = route.params;
+  const { user, userCode, userData, isWebView = false } = route.params;
   const [isLoading, setIsLoading] = useState(false);
+  const [parkingHistory, setParkingHistory] = useState<ParkingSession[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   const handleSendChat = () => {
     setIsLoading(true);
@@ -64,6 +69,26 @@ export const PublicProfileScreen: React.FC = () => {
     }
   };
 
+  const fetchParkingHistory = async () => {
+    if (!userCode) return;
+
+    try {
+      // Use public parking history endpoint if available, otherwise skip
+      const history = await ParkingService.getPublicParkingHistory(userCode);
+      setParkingHistory(history.slice(0, 5)); // Show last 5 sessions
+    } catch (error) {
+      console.error('Public parking history not available:', error);
+      // Fail silently - this is optional information
+    }
+  };
+
+  // Load parking history when component mounts
+  useEffect(() => {
+    if (userCode) {
+      fetchParkingHistory();
+    }
+  }, [userCode]);
+
   const handleCloseProfile = () => {
     navigation.goBack();
   };
@@ -99,6 +124,46 @@ export const PublicProfileScreen: React.FC = () => {
         ) : (
           <View style={publicProfileStyles.carSection}>
             <Text style={publicProfileStyles.noCarText}>No vehicle registered</Text>
+          </View>
+        )}
+
+        {/* Parking History Section */}
+        {parkingHistory.length > 0 && (
+          <View style={publicProfileStyles.historySection}>
+            <TouchableOpacity 
+              style={publicProfileStyles.historyHeader}
+              onPress={() => setShowHistory(!showHistory)}
+            >
+              <Text style={publicProfileStyles.historyTitle}>Recent Parking Activity</Text>
+              <Text style={publicProfileStyles.historyToggle}>
+                {showHistory ? '▼' : '▶'}
+              </Text>
+            </TouchableOpacity>
+            
+            {showHistory && (
+              <View style={publicProfileStyles.historyList}>
+                {parkingHistory.map((session, index) => (
+                  <View key={session.id} style={publicProfileStyles.historyItem}>
+                    <Text style={publicProfileStyles.historyDate}>
+                      {formatLocalTime(session.start_time)}
+                    </Text>
+                    {session.end_time && (
+                      <Text style={publicProfileStyles.historyDuration}>
+                        {calculateParkingDuration(session.start_time, session.end_time)}
+                      </Text>
+                    )}
+                    {session.note_location && (
+                      <Text style={publicProfileStyles.historyLocation}>
+                        📍 {session.note_location}
+                      </Text>
+                    )}
+                  </View>
+                ))}
+                <Text style={publicProfileStyles.historyNote}>
+                  Shows recent parking sessions for reference
+                </Text>
+              </View>
+            )}
           </View>
         )}
 

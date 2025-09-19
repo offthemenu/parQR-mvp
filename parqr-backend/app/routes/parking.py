@@ -129,7 +129,7 @@ def get_parking_history(
     """
         Get user's parking history with optional limit
     """
-    logger.info(f"Getting parking history for user: {current_user.id}")
+    logger.info(f"Getting parking history for user: {current_user.id}, limit: {limit}")
 
     sessions = db.query(ParkingSession).filter(
         ParkingSession.user_id == current_user.id

@@ -1,12 +1,15 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
+import logging
 
 from app.db.base import get_db
 from app.models.user import User
 from app.models.car import Car
 from app.models.parking_session import ParkingSession
 from app.schemas.public_profile_schema import PublicProfileResponse
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/v01/public_profile", tags=["public_profile"])
 
@@ -78,7 +81,7 @@ async def get_public_profile(
         public_message=public_message
     )
 
-@router.get("/{user_code}/parking_history", response_model=list)
+@router.get("/parking_history/{user_code}", response_model=list)
 async def get_public_parking_history(
     user_code: str,
     limit: int=10,
@@ -98,6 +101,8 @@ async def get_public_parking_history(
     Returns:
         List of anonymized parking session data
     """
+    logger.info(f"Getting public parking history for user_code: {user_code}")
+
     user = db.query(User).filter(User.user_code == user_code).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -108,11 +113,15 @@ async def get_public_parking_history(
         ParkingSession.end_time.isnot(None)
     ).order_by(ParkingSession.start_time.desc()).limit(limit).all()
 
-    return [
-        {
-            "session_date": session.start_time.date().isoformat(),
-            "duration_hours": (session.end_time - session.start_time).total_seconds() / 3600 if session.end_time else None,
-            "has_public_message": bool(session.public_message)
-        }
-        for session in recent_sessions
-    ]
+    anonymized_sessions = []
+    for session in recent_sessions:
+        anonymized_sessions.append({
+            "id": session.id,
+            "start_time": session.start_time,
+            "end_time": session.end_time,
+            "public_message": session.public_message
+        })
+    
+    logger.info(f"Returning {len(anonymized_sessions)} public parking sessions")
+
+    return anonymized_sessions

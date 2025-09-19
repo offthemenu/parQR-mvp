@@ -185,4 +185,58 @@ export const publicProfileStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
+  
+  // Parking History Styles
+  historySection: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 8,
+    margin: 16,
+    overflow: 'hidden',
+  },
+  historyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#E9ECEF',
+  },
+  historyTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#495057',
+  },
+  historyToggle: {
+    fontSize: 12,
+    color: '#6C757D',
+  },
+  historyList: {
+    padding: 16,
+  },
+  historyItem: {
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#DEE2E6',
+  },
+  historyDate: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#212529',
+    marginBottom: 2,
+  },
+  historyDuration: {
+    fontSize: 12,
+    color: '#007AFF',
+    marginBottom: 2,
+  },
+  historyLocation: {
+    fontSize: 12,
+    color: '#6C757D',
+  },
+  historyNote: {
+    fontSize: 11,
+    color: '#ADB5BD',
+    textAlign: 'center',
+    marginTop: 12,
+    fontStyle: 'italic',
+  },
 });
