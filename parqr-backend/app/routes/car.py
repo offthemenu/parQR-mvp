@@ -52,6 +52,53 @@ def register_car(
         logger.error(f"Car registration failed: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Registration failed: {str(e)}")
 
+@router.put("/update/{car_id}", response_model=CarOwnerResponse)
+def edit_user_car(
+    car_id: int,
+    car_data: CarRegisterRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Edit current user's car details with ownership verification"""
+    logger.info(f"Update car request: car_id={car_id}, user_id={current_user.id}")
+
+    # Find car and verify ownership
+    car = db.query(Car).filter(
+        Car.id == car_id,
+        Car.owner_id == current_user.id
+    ).first()
+
+    if not car:
+        logger.warning(f"Car not found or not woned by user: car_id={car_id}, user_id={current_user.id}")
+        raise HTTPException(status_code=404, detail="Car not found or not authorized")
+    
+    # Check if license plate is being changed and if new plate already exists
+    if car.license_plate != car_data.license_plate:
+        existing_car = db.query(Car).filter(
+            Car.license_plate == car_data.license_plate,
+            Car.id != car_id # Exclude current car from check
+        ).first()
+
+        if existing_car:
+            raise HTTPException(status_code=409, detail="License plate already exists in the system")
+    
+    try:
+        # Update car fields
+        car.license_plate = car_data.license_plate
+        car.car_brand = car_data.car_brand
+        car.car_model = car_data.car_model
+
+        db.commit()
+        db.refresh(car)
+
+        logger.info(f"Car updated successfully: {car.license_plate}")
+        return car
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed to update car: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update car")
+    
+
 @router.get("/my-cars", response_model=list[CarOwnerResponse])
 def get_user_cars(
     current_user: User = Depends(get_current_user),

@@ -30,7 +30,14 @@ type CarRegistrationScreenNavigationProp = StackNavigationProp<RootStackParamLis
 export const CarRegistrationScreen: React.FC = () => {
   const route = useRoute<CarRegistrationScreenRouteProp>();
   const navigation = useNavigation<CarRegistrationScreenNavigationProp>();
-  const { user } = route.params;
+  
+  const { user, editMode = false, carData } = route.params || {};
+
+  if (!user && !editMode) {
+    console.error("User parameter required for car registration");
+    navigation.goBack();
+    return null;
+  }
 
   const [licensePlate, setLicensePlate] = useState<string>('');
   const [selectedBrand, setSelectedBrand] = useState<string>('');

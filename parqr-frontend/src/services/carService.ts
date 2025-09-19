@@ -16,6 +16,33 @@ export class CarService {
     }
   }
 
+  // Update a selected car for the current user
+  static async updateCar(carId: number, carData: {
+    license_plate: string;
+    car_brand: string;
+    car_model: string;
+  }): Promise<CarOwnerResponse> {
+    try {
+      const response = await apiClient.put(`/v01/car/update/${carId}`, carData);
+      return response.data;
+    } catch (error: any) {
+      console.error("update car error:", error.response?.data || error.message);
+
+      // Handle specific error cases
+      if (error.response?.status === 400) {
+        throw new Error("Invalid car details. Please check your input.");
+      }
+      if (error.response?.status === 404) {
+        throw new Error("Car not found or not authorized to edit.");
+      }
+      if (error.response?.status === 409) {
+        throw new Error("License plate already exists. Please use a different license plate");
+      }
+
+      throw new Error("Failed to update car. Please try again.");
+    }
+  }
+  
   /**
    * Get user's registered cars
    * Returns full car data including license plates since user owns the cars

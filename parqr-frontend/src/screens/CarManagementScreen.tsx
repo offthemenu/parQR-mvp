@@ -46,22 +46,9 @@ export const CarManagementScreen: React.FC<CarManagementScreenProps> = ({ naviga
     };
 
     const handleEditCar = (car: CarOwnerResponse) => {
-        Alert.alert(
-            "Edit Car",
-            `Edit ${car.car_brand} ${car.car_model}?`,
-            [
-                { text: "Cancel", style: "cancel"},
-                {
-                    text: "Edit",
-                    onPress: () => {
-                        navigation.navigate("CarRegistration", {
-                            editMode: true,
-                            carData: car
-                        });
-                    }
-                }
-            ]
-        );
+        navigation.navigate("EditCar", {
+            carData: car
+        });
     };
 
     const handleRemoveCar = (car: CarOwnerResponse) => {

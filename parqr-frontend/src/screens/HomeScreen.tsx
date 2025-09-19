@@ -12,6 +12,7 @@ import { homeScreenStyles } from '../styles/homeScreenStyles';
 import { useChatNotifications } from '../hooks/useChatNotifications';
 import { NotificationBadge } from '../components/home/NotificationBadge';
 import { ParkingService } from '../services/parkingService';
+import { UserService } from '../services/userService';
 import { ParkingSessionCard } from '../components/home/ParkingSessionCard';
 import { ParkingSession } from '../types';
 import { ParkOutRequestsSection } from '../components/home/ParkOutRequestsSection';
@@ -24,6 +25,7 @@ type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 export const HomeScreen: React.FC = () => {
   const route = useRoute<HomeScreenRouteProp>();
   const { user } = route.params;
+  const [currentUser, setCurrentUser] = useState(user);
   // feature gating for chat section
   const { canAccessChat } = useFeatureGating(user.user_tier);
 
@@ -96,16 +98,32 @@ export const HomeScreen: React.FC = () => {
     }, [refreshUnreadCount])
   );
 
+  // Refresh user data
+  useFocusEffect(
+    React.useCallback(() => {
+      const refreshUserData = async () => {
+        try {
+          // Get updated user data with cars
+          const updatedUser = await UserService.lookupUser(user.user_code);
+          setCurrentUser(updatedUser);
+        } catch (error) {
+          console.error("Error refreshing user data:", error);
+        }
+      };
+      refreshUserData();
+    }, [user.user_code])
+  );
+
   // parking session handlers
   const handleStartParking = async () => {
     // Check if user has cars property (UserLookupResponse vs RegisterUserResponse)
-    if (!('cars' in user) || !user.cars || user.cars.length === 0) {
+    if (!('cars' in currentUser) || !currentUser.cars || currentUser.cars.length === 0) {
       Alert.alert('No Cars', 'Please register a car before starting a parking session.');
       return;
     }
 
     // For now, use the first car. In a full implementation, show car selection
-    const carId = user.cars[0].id;
+    const carId = currentUser.cars[0].id;
 
     setIsLoadingParking(true);
 
@@ -160,9 +178,9 @@ export const HomeScreen: React.FC = () => {
         </View>
 
         {/* RegisteredCarPanel - Active car details */}
-        {'cars' in user && user.cars && user.cars.length > 0 ? (
+        {'cars' in currentUser && currentUser.cars && currentUser.cars.length > 0 ? (
           <RegisteredCarPanel
-            car={user.cars[0]}
+            car={currentUser.cars[0]}
             onManageCars={handleManageCars}
           />
         ) : (
@@ -170,7 +188,7 @@ export const HomeScreen: React.FC = () => {
             <Text style={homeScreenStyles.sectionTitle}>No Registered Vehicle</Text>
             <ActionButton
               title="📝 Register a Car"
-              onPress={() => navigation.navigate('CarRegistration', { user })}
+              onPress={() => navigation.navigate('CarRegistration', { user: currentUser })}
               variant="secondary"
             />
           </View>

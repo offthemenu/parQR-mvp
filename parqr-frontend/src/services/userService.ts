@@ -4,6 +4,7 @@ import {
   RegisterUserResponse, 
   ServicingCountriesResponse,
   User,
+  UserLookupResponse,
   UserWithCarsResponse
 } from '../types';
 
@@ -73,7 +74,7 @@ export class UserService {
   /**
    * Look up user by user_code for sign-in
    */
-  static async lookupUser(userCode: string): Promise<UserWithCarsResponse> {
+  static async lookupUser(userCode: string): Promise<UserLookupResponse> {
     try {
       const response = await apiClient.get(`/v01/user/lookup/${userCode.toUpperCase()}`);
       return response.data;

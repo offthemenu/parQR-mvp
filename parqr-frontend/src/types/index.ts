@@ -6,7 +6,9 @@ export type RootStackParamList = {
   SignIn: undefined;
   Register: undefined;
   CarRegistration: {
-    user: UserLookupResponse | RegisterUserResponse;
+    user?: UserLookupResponse | RegisterUserResponse;
+    editMode?: boolean;
+    carData?: CarOwnerResponse;
   };
   Home: {
     user: UserLookupResponse | RegisterUserResponse;
@@ -25,6 +27,9 @@ export type RootStackParamList = {
     userCode: string;
   };
   CarManagement: undefined;
+  EditCar: {
+    carData: CarOwnerResponse;
+  };
   QRScanner: undefined; 
   PublicProfile: { 
     userCode: string;

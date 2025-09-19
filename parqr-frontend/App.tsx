@@ -14,6 +14,7 @@ import { ChatListScreen } from './src/screens/ChatListScreen';
 import { ParkOutHistoryScreen } from './src/screens/ParkOutHistoryScreen';
 import { ParkingHistoryScreen } from './src/screens/ParkingHistoryScreen';
 import { CarManagementScreen } from './src/screens/CarManagementScreen';
+import { EditCarScreen } from './src/screens/EditCarScreen';
 import { RootStackParamList } from './src/types';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -61,6 +62,17 @@ export default function App() {
             title: 'Add Your Car',
             headerLeft: () => null,
             gestureEnabled: false
+          }}
+        />
+        <Stack.Screen
+          name="EditCar"
+          component={EditCarScreen}
+          options={{
+            title: 'Edit Car',
+            headerStyle: {
+              backgroundColor: '#007AFF',
+            },
+            headerTintColor: '#fff',
           }}
         />
         <Stack.Screen 
