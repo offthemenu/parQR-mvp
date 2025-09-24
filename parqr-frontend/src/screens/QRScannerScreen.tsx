@@ -32,8 +32,8 @@ export const QRScannerScreen: React.FC = () => {
         // Custom scheme format
         return data.split('/profile/')[1];
       } else if (data.startsWith('QR_')) {
-        // Direct QR code ID format - need to look up user
-        return null; // Will need to implement QR ID lookup
+        // QR code ID format - backend will handle lookup by QR ID
+        return data;
       } else if (data.length === 8 && /^[A-Z0-9]+$/.test(data)) {
         // Direct user code format
         return data;
@@ -51,9 +51,10 @@ export const QRScannerScreen: React.FC = () => {
     setIsLoading(true);
 
     try {
-      console.log('QR Code scanned:', data);
+      console.log('🔍 QR Code scanned - Raw data:', data);
       
       const userCode = extractUserCodeFromQR(data);
+      console.log('📝 Extracted user code:', userCode);
       
       if (!userCode) {
         safeAlert(
