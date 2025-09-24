@@ -16,10 +16,6 @@ export type RootStackParamList = {
   Profile: {
     user: UserLookupResponse | RegisterUserResponse;
   };
-  PublicProfilePage: {
-    scannedUserCode: string;
-    showMoveRequestForm?: boolean;
-  };
   ParkOutHistory: {
     userCode: string;
   };
