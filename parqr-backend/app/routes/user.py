@@ -158,18 +158,22 @@ def get_public_user_info(
         signup_country_iso=user.signup_country_iso
     )
 
-@router.get("/lookup/{user_code}", response_model=UserWithCarsResponse)
+@router.get("/lookup/{lookup_code}", response_model=UserWithCarsResponse)
 def lookup_user(
-    user_code: str,
+    lookup_code: str,
     db: Session = Depends(get_db)
 ):
-    """Look up user by user_code for sign-in flow"""
-    logger.info(f"User lookup request for user_code: {user_code}")
-
-    user = db.query(User).filter(User.user_code == user_code).first()
+    """Look up user by user_code or QR code ID for sign-in flow"""
+    logger.info(f"User lookup request for identifier: {lookup_code}")
+    
+    # Check if it's a QR code ID format (starts with QR_)
+    if lookup_code.startswith("QR_"):
+        user = db.query(User).filter(User.qr_code_id == lookup_code).first()
+    else:
+        user = db.query(User).filter(User.user_code == lookup_code).first()
 
     if not user:
-        logger.warning(f"User not found for user_code: {user_code}")
+        logger.warning(f"User not found for user_code: {lookup_code}")
         raise HTTPException(
             status_code=404,
             detail={
@@ -192,6 +196,11 @@ def lookup_user(
         }
         for car in cars
     ]
+    
+    # Get user tier (default to 'free' if not set)
+    user_tier_value = "free"
+    if user.user_tier:
+        user_tier_value = user.user_tier.tier
 
     # Create response (excluding phone_number for privacy)
     response_data = UserWithCarsResponse(
@@ -200,6 +209,11 @@ def lookup_user(
         qr_code_id=user.qr_code_id,
         created_at=user.created_at,
         signup_country_iso=user.signup_country_iso,
+        qr_image_path=user.qr_image_path,
+        profile_deep_link=user.profile_deep_link,
+        profile_bio=user.profile_bio,
+        profile_display_name=user.profile_display_name,
+        user_tier=user_tier_value,
         cars=cars_data
     )
     

@@ -34,6 +34,10 @@ class UserWithCarsResponse(BaseModel):
     created_at: datetime
     signup_country_iso: str
     qr_image_path: Optional[str] = None
+    profile_deep_link: Optional[str] = None
+    profile_bio: Optional[str] = None
+    profile_display_name: Optional[str] = None
+    user_tier: str = "basic"  # User tier for feature gating
     cars: list[dict] = [] # populated with car data
 
     model_config = {"from_attributes": True}
