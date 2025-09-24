@@ -72,7 +72,6 @@ export interface UserWithCarsResponse {
 
 export interface UserLookupResponse {
   id: number;
-  phone_number: string;
   user_code: string;
   qr_code_id: string;
   created_at: string;
@@ -83,6 +82,7 @@ export interface UserLookupResponse {
   qr_image_path?: string;
   signup_country_iso: string;
   user_tier: string;
+  // Note: phone_number deliberately excluded for privacy
 }
 
 // Car related types

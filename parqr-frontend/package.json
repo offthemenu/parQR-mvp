@@ -11,28 +11,28 @@
     "update-ip": "node -e \"const fs=require('fs');const os=require('os');const nets=os.networkInterfaces();const ip=Object.values(nets).flat().find(n=>n.family==='IPv4'&&!n.internal&&n.address.startsWith('192.168.')).address;const config=fs.readFileSync('src/config/development.local.ts','utf8');const updated=config.replace(/http:\\/\\/[\\d.]+:/,'http://'+ip+':');fs.writeFileSync('src/config/development.local.ts',updated);console.log('Updated IP to:',ip);\""
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "2.1.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-picker/picker": "^2.11.1",
     "@react-navigation/native": "^7.1.17",
     "@react-navigation/stack": "^7.4.5",
     "axios": "^1.11.0",
-    "expo": "~53.0.20",
-    "expo-camera": "~16.1.11",
-    "expo-clipboard": "~7.1.5",
-    "expo-linking": "~7.1.7",
-    "expo-status-bar": "~2.2.3",
-    "react": "19.0.0",
-    "react-native": "0.79.5",
+    "expo": "^54.0.10",
+    "expo-camera": "~17.0.8",
+    "expo-clipboard": "~8.0.7",
+    "expo-linking": "~8.0.8",
+    "expo-status-bar": "~3.0.8",
+    "react": "19.1.0",
+    "react-native": "0.81.4",
+    "react-native-gesture-handler": "~2.28.0",
     "react-native-qrcode-svg": "^6.3.15",
-    "react-native-safe-area-context": "5.4.0",
-    "react-native-screens": "~4.11.1",
-    "react-native-gesture-handler": "~2.24.0",
-    "react-native-svg": "15.11.2"
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
+    "react-native-svg": "15.12.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
-    "@types/react": "~19.0.10",
-    "typescript": "~5.8.3"
+    "@types/react": "~19.1.10",
+    "typescript": "~5.9.2"
   },
   "private": true
 }
