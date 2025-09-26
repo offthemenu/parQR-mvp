@@ -88,6 +88,10 @@ ios/your-app.xcscheme/
 **/development.local.ts
 .env*.local
 
+# Sensitive deployment files
+.env.production
+**/deployment-vars.sh
+
 sprint-roadmaps
 medium-articles
 *qr_images
