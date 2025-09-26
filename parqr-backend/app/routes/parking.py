@@ -41,6 +41,7 @@ def start_parking(
         car_id=session_data.car_id,
         start_time=start_time,
         note_location=session_data.note_location,
+        public_message=session_data.public_message,
         latitude=session_data.latitude,
         longitude=session_data.longitude
     )

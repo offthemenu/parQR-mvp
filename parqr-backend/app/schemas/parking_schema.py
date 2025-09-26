@@ -5,6 +5,7 @@ from datetime import datetime
 class ParkingSessionCreate(BaseModel):
     car_id: int
     note_location: Optional[str] = None
+    public_message: Optional[str] = None
     longitude: Optional[float] = None
     latitude: Optional[float] = None
 
@@ -18,6 +19,7 @@ class ParkingSessionOut(BaseModel):
     start_time: datetime
     end_time: Optional[datetime]
     note_location: Optional[str] = None
+    public_message: Optional[str] = None
     longitude: Optional[float] = None
     latitude: Optional[float] = None
 

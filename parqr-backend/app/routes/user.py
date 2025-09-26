@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.base import get_db
 from app.models.user import User
+from app.models.car import Car
+from app.models.parking_session import ParkingSession
 from app.schemas.user_schema import UserRegisterRequest, UserResponse, UserPublicResponse, UserWithCarsResponse
 from app.dependencies.auth import get_current_user
 from app.services.qr_service import QRCodeService
@@ -183,7 +185,6 @@ def lookup_user(
         )
     
     # Get user's cars
-    from app.models.car import Car
     cars = db.query(Car).filter(Car.owner_id == user.id).all()
 
     # Convert cars to dict format (excluding license_plate for privacy)
@@ -202,6 +203,11 @@ def lookup_user(
     if user.user_tier:
         user_tier_value = user.user_tier.tier
 
+    active_parking_sessions = db.query(ParkingSession).filter(
+        ParkingSession.user_id == user.id,
+        ParkingSession.end_time.is_(None)
+    ).first()
+
     # Create response (excluding phone_number for privacy)
     response_data = UserWithCarsResponse(
         id=user.id,
@@ -214,7 +220,9 @@ def lookup_user(
         profile_bio=user.profile_bio,
         profile_display_name=user.profile_display_name,
         user_tier=user_tier_value,
-        cars=cars_data
+        cars=cars_data,
+        parking_status = "active" if active_parking_sessions else "not_parked",
+        public_message = active_parking_sessions.public_message if active_parking_sessions else None
     )
     
     logger.info(f"User lookup successful: {user.user_code} with {len(cars_data)} cars")

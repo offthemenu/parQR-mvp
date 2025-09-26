@@ -78,6 +78,8 @@ export interface UserLookupResponse {
   qr_image_path?: string;
   signup_country_iso: string;
   user_tier: string;
+  parking_status: "active" | "not_parked";
+  public_message?: string
   // Note: phone_number deliberately excluded for privacy
 }
 

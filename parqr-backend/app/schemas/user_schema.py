@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Literal
 from datetime import datetime
 
 class UserRegisterRequest(BaseModel):
@@ -39,5 +39,7 @@ class UserWithCarsResponse(BaseModel):
     profile_display_name: Optional[str] = None
     user_tier: str = "basic"  # User tier for feature gating
     cars: list[dict] = [] # populated with car data
+    parking_status: Literal["active", "not_parked"] = "not_parked"
+    public_message = Optional[str] = None
 
     model_config = {"from_attributes": True}
